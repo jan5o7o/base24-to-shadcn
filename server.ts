@@ -1,0 +1,298 @@
+
+const BASECOAT_VERSION = '1.0.1';
+
+// ── Conversion helpers ────────────────────────────────────────────
+function parseYaml(raw) {
+  const scheme = { name:'Unknown', author:'', palette:{}, variant:undefined };
+  const lines = raw.split('\n');
+  let inPalette = false;
+  for (const rawLine of lines) {
+    const ci = rawLine.search(/(?:\s|")#(?:\s|$)/);
+    const line = ci >= 0 ? rawLine.substring(0, ci).trimEnd() : rawLine;
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    if (t === 'palette:') { inPalette = true; continue; }
+    if (inPalette) {
+      const m = t.match(/^(base[0-9A-Fa-f]{2}):\s*(?:["'])?#?([0-9a-fA-F]{6})(?:["'])?\s*$/);
+      if (m) { scheme.palette[m[1]] = m[2]; continue; }
+      if (!t.startsWith(' ')) inPalette = false; else continue;
+    }
+    const kv = t.match(/^([a-zA-Z_]\w*):\s*(?:["'])?(.+?)(?:["'])?\s*$/);
+    if (kv) { if (kv[1]==='name') scheme.name=kv[2]; if (kv[1]==='author') scheme.author=kv[2]; if (kv[1]==='variant') scheme.variant=kv[2]; }
+  }
+  return scheme;
+}
+function hexToRgb(h) { return [parseInt(h.substring(0,2),16)/255, parseInt(h.substring(2,4),16)/255, parseInt(h.substring(4,6),16)/255]; }
+function linearize(c) { return c <= 0.04045 ? c/12.92 : ((c+0.055)/1.055)**2.4; }
+function hexToOklch(hex) {
+  const [r,g,b] = hexToRgb(hex);
+  const lr=linearize(r),lg=linearize(g),lb=linearize(b);
+  const x=0.4124564*lr+0.3575761*lg+0.1804375*lb;
+  const y=0.2126729*lr+0.7151522*lg+0.0721750*lb;
+  const z=0.0193339*lr+0.1191920*lg+0.9503041*lb;
+  const l1=0.8189330101*x+0.3618667424*y-0.1288597137*z;
+  const m=0.0329845436*x+0.9293118715*y+0.0361456387*z;
+  const s=0.0482003018*x+0.2643662691*y+0.6338517070*z;
+  const l_=Math.cbrt(l1),m_=Math.cbrt(m),s_=Math.cbrt(s);
+  const L=0.2104542553*l_+0.7936177850*m_-0.0040720468*s_;
+  const A=1.9779984951*l_-2.4285922050*m_+0.4505937099*s_;
+  const B=0.0259040371*l_+0.7827717662*m_-0.8086757660*s_;
+  const C=Math.sqrt(A*A+B*B);
+  let H=Math.atan2(B,A)*180/Math.PI; if(H<0)H+=360;
+  return {l:L,c:C,h:H};
+}
+function oklchS(c) { return 'oklch(' + c.l.toFixed(3) + ' ' + c.c.toFixed(3) + ' ' + Math.round(c.h) + ')'; }
+
+function detectMode(scheme) {
+  if (scheme.variant==='dark') return 'dark';
+  if (scheme.variant==='light') return 'light';
+  const lum = (h) => { const [r,g,b]=hexToRgb(h); return 0.2126*linearize(r)+0.7152*linearize(g)+0.0722*linearize(b); };
+  return lum(scheme.palette.base00) < lum(scheme.palette.base07) ? 'dark' : 'light';
+}
+
+function generateCSS(scheme, primarySlot, radius, proxyMode, stylePack) {
+  primarySlot = primarySlot || 'base0D';
+  radius = radius || '0.625rem';
+  const mode = detectMode(scheme);
+  const opp = {};
+  for (const [a,b] of [['base00','base07'],['base01','base06'],['base02','base05'],['base03','base04']]) {
+    opp[a]=oklchS(hexToOklch(scheme.palette[b])); opp[b]=oklchS(hexToOklch(scheme.palette[a]));
+  }
+  for (const [s,tl] of [['base10',0.90],['base11',0.95]]) {
+    if (scheme.palette[s]) { const c=hexToOklch(scheme.palette[s]); opp[s]=oklchS({l:tl,c:0.02,h:c.h}); }
+  }
+  for (const s of ['base08','base09','base0A','base0B','base0C','base0D','base0E','base0F']) {
+    if (scheme.palette[s]) { const c=hexToOklch(scheme.palette[s]); opp[s]=oklchS({l:c.l<0.5?0.60:0.55,c:Math.min(c.c,0.15),h:c.h}); }
+  }
+  for (const s of ['base12','base13','base14','base15','base16','base17']) {
+    if (scheme.palette[s]) { const c=hexToOklch(scheme.palette[s]); opp[s]=oklchS({l:c.l<0.5?Math.max(c.l+0.10,0.50):Math.min(c.l-0.05,0.65),c:Math.min(c.c,0.18),h:c.h}); }
+  }
+  const p = scheme.palette;
+  const resolve = (slot, useOpp) => {
+    if (!slot) return '';
+    if (useOpp && opp[slot]) return opp[slot];
+    const hex = p[slot] || p.base00;
+    return oklchS(hexToOklch(hex));
+  };
+  const tokens = [
+    ['background','base00'],['foreground','base05'],['card','base01'],['card-foreground','base05'],
+    ['popover','base01'],['popover-foreground','base05'],['primary',primarySlot],['primary-foreground','base00'],
+    ['secondary','base02'],['secondary-foreground','base05'],['muted','base01'],['muted-foreground','base04'],
+    ['accent','base02'],['accent-foreground','base05'],['destructive','base08'],['destructive-foreground','base05'],
+    ['border','base03'],['input','base03'],['ring',primarySlot],['chart-1',primarySlot],['chart-2','base0B'],
+    ['chart-3','base0A'],['chart-4','base0E'],['chart-5','base08'],
+  ];
+  
+  const real = (mode==='dark' && !proxyMode) ? '.dark' : ':root';
+  const oppSel = (mode==='dark' && !proxyMode) ? ':root' : '.dark';
+  const schemeUrl = schemeCache.get(scheme.name.replace(/\s+/g,'-').toLowerCase()) || '';
+  const lines = [
+    '/*',
+    ' * base24 theme: ' + scheme.name,
+    ' * Author: ' + (scheme.author || 'Unknown'),
+    ' * Source: ' + (schemeUrl || 'https://github.com/tinted-theming/schemes/tree/spec-0.11/base24'),
+    ' * Basecoat style pack: ' + (stylePack || 'vega') + ' (https://basecoatui.com)',
+    ' * Generated by base24-to-shadcn',
+    ' * Only color tokens — radius, spacing, shadows belong to the style pack.',
+    ' */',
+  ];
+  // Light variant (auto-generated opposite)
+  lines.push(oppSel + ' {');
+  for (const [tok,slot] of tokens) { lines.push('  --' + tok + ': ' + resolve(slot, true) + ';'); }
+  lines.push('}');
+  // Dark variant (real scheme)
+  lines.push(real + ' {');
+  for (const [tok,slot] of tokens) { lines.push('  --' + tok + ': ' + resolve(slot, false) + ';'); }
+  lines.push('}');
+  // --color-* mappings
+  lines.push(':root, .dark {');
+  for (const [tok] of tokens) { lines.push('  --color-' + tok + ': var(--' + tok + ');'); }
+  lines.push('}');
+  
+  // Cascade fix: only Preflight border/padding overrides
+  lines.push('.btn,.badge,.card,.input,.select,.alert{border-width:1px;border-style:solid}');
+  lines.push('.btn,.input,.select{padding-inline:calc(var(--spacing,.25rem)*2.5)}');
+  // Checkbox checkmark visibility — use background color for contrast on primary
+  lines.push(':is(.field>input[type=checkbox],.input[type=checkbox]):checked{color:var(--background)!important}');
+  return { css: lines.join('\n'), mode };
+}
+
+// ── Cache ──────────────────────────────────────────────────────────
+const schemeCache = new Map();
+const GH_LIST = 'https://api.github.com/repos/tinted-theming/schemes/contents/base24?ref=spec-0.11';
+
+async function getSchemeList() {
+  if (schemeCache.size > 0) return Array.from(schemeCache.entries()).map(([name,url]) => ({name,url}));
+  const res = await fetch(GH_LIST, { headers: { 'User-Agent': 'base24-gallery' } });
+  const files = await res.json();
+  for (const f of files) {
+    if (f.name.endsWith('.yaml')) {
+      schemeCache.set(f.name.replace('.yaml',''), f.download_url);
+    }
+  }
+  return Array.from(schemeCache.entries()).map(([name,url]) => ({name,url}));
+}
+
+const cssCache = new Map();
+async function getSchemeCSS(name, primarySlot, stylePack) {
+  const key = name + '|' + (primarySlot || 'base0D') + '|' + (stylePack || 'vega');
+  if (cssCache.has(key)) return cssCache.get(key);
+  const url = schemeCache.get(name);
+  if (!url) return null;
+  const yaml = await (await fetch(url)).text();
+  const scheme = parseYaml(yaml);
+  const result = generateCSS(scheme, primarySlot || 'base0D', '0.625rem', true, stylePack || 'vega');
+  cssCache.set(key, result);
+  return result;
+}
+
+// ── Server ─────────────────────────────────────────────────────────
+const server = Bun.serve({
+  port: 3000,
+  async fetch(req) {
+    const url = new URL(req.url);
+    
+    // Proxy basecoatui.com with injected theme — any path under /browse
+    if (url.pathname.startsWith('/browse')) {
+      const schemeName = url.searchParams.get('scheme') || '';
+      const primarySlot = url.searchParams.get('primary') || 'base0D';
+      
+      // Build target URL on basecoatui.com
+      const bcPath = url.pathname.replace(/^\/browse/, '') || '/';
+      // Strip our custom params, keep any basecoat-native ones
+      const bcParams = new URLSearchParams(url.searchParams);
+      bcParams.delete('scheme');
+      bcParams.delete('primary');
+      const qs = bcParams.toString();
+      const cleanBcUrl = 'https://basecoatui.com' + bcPath + (qs ? '?' + qs : '');
+      const bcRes = await fetch(cleanBcUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+      });
+      let html = await bcRes.text();
+      
+      // Only inject theme/picker on HTML pages (not assets)
+      const ct = bcRes.headers.get('content-type') || '';
+      if (!ct.includes('text/html')) {
+        return new Response(html, { headers: { 'content-type': ct } });
+      }
+      
+      await getSchemeList();
+      const currentStyle = url.searchParams.get('style') || 'vega';
+      const hasTheme = schemeName && schemeName !== 'default';
+      let css = '', mode = '';
+      if (hasTheme) {
+        const result = await getSchemeCSS(schemeName, primarySlot, currentStyle);
+        css = result.css; mode = result.mode;
+      }
+      
+      const schemes = await getSchemeList();
+      const currentPath = bcPath === '/' ? '' : bcPath;
+      const dropdownOpts = '<option value=""' + (!hasTheme ? ' selected' : '') + '>— Default (no theme) —</option>' +
+        schemes
+        .sort((a,b) => a.name.localeCompare(b.name))
+        .map(s => '<option value="' + s.name + '"' + (s.name === schemeName ? ' selected' : '') + '>' + s.name.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) + '</option>')
+        .join('');
+      
+      // Base tag for resources; remove hx-boost so we control navigation
+      html = html.replace('<head>', '<head><base href="https://basecoatui.com">');
+      html = html.replace(/ hx-(?:boost|target|select|swap|push-url|replace-url)(?:="[^"]*")?/g, '');
+      
+      // Inject theme CSS (skip if no theme selected)
+      if (hasTheme) {
+        html = html.replace('</head>', '<style id="base24-theme">\n' + css + '\n</style>\n</head>');
+      }
+      // Always inject checkbox contrast fix (even without a theme)
+      html = html.replace('</head>', '<style>:is(.field>input[type=checkbox],.input[type=checkbox]):checked{color:var(--background)!important}</style>\n</head>');
+      const schemeUrl = hasTheme ? (schemeCache.get(schemeName) || '') : '';
+      const ghUrl = schemeUrl ? schemeUrl.replace('raw.githubusercontent.com', 'github.com').replace('/spec-0.11/', '/blob/spec-0.11/') : '';
+      const host = req.headers.get('host') || 'localhost:3000';
+      const cssUrl = hasTheme ? ('http://' + host + '/theme.css?scheme=' + schemeName + (primarySlot !== 'base0D' ? '&primary=' + primarySlot : '')) : '';
+      const stylePacks = ['vega','nova','maia','lyra','mira','luma','sera','rhea'];
+      const styleOpts = stylePacks.map(s => '<option value="' + s + '"' + (s === currentStyle ? ' selected' : '') + '>' + s[0].toUpperCase() + s.slice(1) + '</option>').join('');
+      
+      const picker = '<div id="base24-picker" style="position:fixed;top:8px;right:8px;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--foreground);box-shadow:0 2px 8px rgba(0,0,0,.15);font-family:system-ui,sans-serif;">' +
+        '<span style="opacity:.5;">Style:</span>' +
+        '<select onchange="window._base24SwitchStyle(this.value)" style="background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;max-width:72px;">' + styleOpts + '</select>' +
+        '<span style="opacity:.5;">Color:</span>' +
+        '<select onchange="window._base24Navigate(this.value)" style="background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;max-width:100px;">' + dropdownOpts + '</select>' +
+        (hasTheme ? '<a href="' + cssUrl + '" target="_blank" style="color:var(--primary);text-decoration:none;white-space:nowrap;font-size:11px;" title="Download theme.css">CSS</a>' : '') +
+        (ghUrl ? '<a href="' + ghUrl + '" target="_blank" style="color:var(--muted-foreground);text-decoration:none;white-space:nowrap;font-size:11px;" title="View source on GitHub">↗</a>' : '') +
+        '</div>';
+      const script = '<script>' +
+        'window._base24Path="' + currentPath + '";' +
+        'window._base24Scheme="' + schemeName + '";' +
+        'window._base24Primary="' + primarySlot + '";' +
+        'window._base24Style="' + currentStyle + '";' +
+        'window._base24Navigate=function(s){' +
+          'var q="?scheme="+(s||"")+"&style="+window._base24Style;' +
+          'if(!s)q="?style="+window._base24Style;' +
+          'location.href=location.origin+"/browse"+window._base24Path+q+(window._base24Primary!=="base0D"&&s?"&primary="+window._base24Primary:"");' +
+        '};' +
+        'window._base24SwitchStyle=function(s){' +
+          'window._base24Style=s;' +
+          'var q="?scheme="+window._base24Scheme+"&style="+s;' +
+          'if(!window._base24Scheme)q="?style="+s;' +
+          'location.href=location.origin+"/browse"+window._base24Path+q+(window._base24Primary!=="base0D"&&window._base24Scheme?"&primary="+window._base24Primary:"");' +
+        '};' +
+        'window._base24ApplyStyle=function(s){' +
+          'var sel=document.getElementById("style-variant-select");' +
+          'if(sel&&sel.value!==s){sel.value=s;sel.dispatchEvent(new Event("change",{bubbles:true}));}' +
+          'try{localStorage.setItem("styleVariant",s)}catch(_){}' +
+        '};' +
+        'window._base24ReapplyTheme=function(){' +
+          'var s=document.getElementById("base24-theme");' +
+          'if(s){var p=s.parentNode;s.remove();document.head.appendChild(s);}' +
+        '};' +
+        'document.addEventListener("click",function(e){' +
+          'var a=e.target.closest("a");if(!a||a.target)return;' +
+          'var raw=a.getAttribute("href");' +
+          'if(!raw||!raw.startsWith("/")||raw.startsWith("//")||raw.startsWith("/browse")||raw.startsWith("/_")||raw.startsWith("/theme.css")||raw.startsWith("/schemes"))return;' +
+          'e.preventDefault();e.stopPropagation();' +
+          'var q="?scheme="+window._base24Scheme+"&style="+window._base24Style;' +
+          'if(!window._base24Scheme)q="?style="+window._base24Style;' +
+          'location.href=location.origin+"/browse"+raw+q+(window._base24Primary!=="base0D"&&window._base24Scheme?"&primary="+window._base24Primary:"");' +
+        '},true);' +
+        'document.addEventListener("basecoat:stylechange",function(){setTimeout(window._base24ReapplyTheme,50)});' +
+        'setTimeout(function(){window._base24ApplyStyle(window._base24Style);if(window._base24Scheme)setTimeout(window._base24ReapplyTheme,200)},100);' +
+        '</script>';
+      
+      if (hasTheme && mode === 'dark') {
+        html = html.replace('<html lang="en">', '<html lang="en" class="dark">');
+      }
+      html = html.replace(/<body[^>]*>/, '$&' + picker + script);
+      
+      return new Response(html, {
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
+      });
+    }
+    // API: list schemes
+    if (url.pathname === '/schemes') {
+      const schemes = await getSchemeList();
+      return Response.json(schemes);
+    }
+    
+    // API: get CSS for a scheme
+    if (url.pathname === '/theme.css') {
+      const schemeName = url.searchParams.get('scheme') || 'one-dark';
+      const primarySlot = url.searchParams.get('primary') || 'base0D';
+      const stylePack = url.searchParams.get('style') || 'vega';
+      await getSchemeList();
+      const { css } = await getSchemeCSS(schemeName, primarySlot, stylePack);
+      return new Response(css, {
+        headers: { 'Content-Type': 'text/css' }
+      });
+    }
+    
+    // Static files
+    let path = url.pathname === '/' ? '/gallery.html' : url.pathname;
+    const file = Bun.file('.' + path);
+    if (await file.exists()) {
+      return new Response(file);
+    }
+    
+    return new Response('404', { status: 404 });
+  },
+});
+
+console.log('Serving at http://localhost:3000');
+console.log('Browse: http://localhost:3000/browse?scheme=one-dark');

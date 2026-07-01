@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base24 → shadcn/ui Theme Gallery</title>
+
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        background: 'var(--background)', foreground: 'var(--foreground)',
+        card: 'var(--card)', 'card-foreground': 'var(--card-foreground)',
+        popover: 'var(--popover)', 'popover-foreground': 'var(--popover-foreground)',
+        primary: 'var(--primary)', 'primary-foreground': 'var(--primary-foreground)',
+        secondary: 'var(--secondary)', 'secondary-foreground': 'var(--secondary-foreground)',
+        muted: 'var(--muted)', 'muted-foreground': 'var(--muted-foreground)',
+        accent: 'var(--accent)', 'accent-foreground': 'var(--accent-foreground)',
+        destructive: 'var(--destructive)', border: 'var(--border)',
+        input: 'var(--input)', ring: 'var(--ring)',
+      },
+    },
+  },
+};
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://unpkg.com/basecoat-css@1.0.1/dist/basecoat.cdn.min.css" />
+
+<style id="theme-style">/* placeholder */</style>
+
+<style>
+  .btn,.badge,.card,.input,.select,.alert{border-width:1px;border-style:solid}
+  .btn,.input,.select{padding-inline:.625rem}
+  .btn:not([data-variant]),.btn[data-variant="primary"]{background-color:var(--color-primary);color:var(--color-primary-foreground);border-color:transparent}
+  .btn[data-variant="secondary"]{background-color:var(--color-secondary);color:var(--color-secondary-foreground);border-color:transparent}
+  .btn[data-variant="destructive"]{background-color:var(--color-destructive);color:var(--color-primary-foreground);border-color:transparent}
+  .btn[data-variant="outline"]{background-color:transparent;color:var(--color-foreground);border-color:var(--color-border)}
+  .btn[data-variant="ghost"]{background-color:transparent;color:var(--color-foreground);border-color:transparent}
+  .btn:not([data-variant]):hover,.btn[data-variant="primary"]:hover{background-color:color-mix(in oklab,var(--color-primary)80%,transparent)}
+  .btn[data-variant="secondary"]:hover{background-color:color-mix(in oklab,var(--color-secondary)80%,var(--color-foreground)5%)}
+  .btn[data-variant="outline"]:hover,.btn[data-variant="ghost"]:hover{background-color:var(--color-muted)}
+  .btn[data-variant="destructive"]:hover{background-color:color-mix(in oklab,var(--color-destructive)80%,transparent)}
+  .card{background-color:var(--color-card);color:var(--color-card-foreground);border-color:var(--color-border)}
+  .badge:not([data-variant]),.badge[data-variant="primary"]{background-color:var(--color-primary);color:var(--color-primary-foreground);border-color:transparent}
+  .badge[data-variant="secondary"]{background-color:var(--color-secondary);color:var(--color-secondary-foreground);border-color:transparent}
+  .badge[data-variant="destructive"]{background-color:var(--color-destructive);color:var(--color-primary-foreground);border-color:transparent}
+  .badge[data-variant="outline"]{background-color:transparent;color:var(--color-foreground);border-color:var(--color-border)}
+  .input,.select{background-color:transparent;color:var(--color-foreground);border-color:var(--color-border)}
+  .alert{background-color:var(--color-card);color:var(--color-card-foreground);border-color:var(--color-border)}
+  :is(.field>input[type=checkbox],.input[type=checkbox]):checked{color:var(--background)!important}
+  :root,.dark{--color-background:var(--background);--color-foreground:var(--foreground);--color-card:var(--card);--color-card-foreground:var(--card-foreground);--color-popover:var(--popover);--color-popover-foreground:var(--popover-foreground);--color-primary:var(--primary);--color-primary-foreground:var(--primary-foreground);--color-secondary:var(--secondary);--color-secondary-foreground:var(--secondary-foreground);--color-muted:var(--muted);--color-muted-foreground:var(--muted-foreground);--color-accent:var(--accent);--color-accent-foreground:var(--accent-foreground);--color-destructive:var(--destructive);--color-border:var(--border);--color-input:var(--input);--color-ring:var(--ring);--color-chart-1:var(--chart-1);--color-chart-2:var(--chart-2);--color-chart-3:var(--chart-3);--color-chart-4:var(--chart-4);--color-chart-5:var(--chart-5);--color-sidebar:var(--sidebar);--color-sidebar-foreground:var(--sidebar-foreground);--color-sidebar-primary:var(--sidebar-primary);--color-sidebar-primary-foreground:var(--sidebar-primary-foreground);--color-sidebar-accent:var(--sidebar-accent);--color-sidebar-accent-foreground:var(--sidebar-accent-foreground);--color-sidebar-border:var(--sidebar-border);--color-sidebar-ring:var(--sidebar-ring)}
+  body{font-family:system-ui,-apple-system,sans-serif}
+  .gallery-layout{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
+  .scheme-list{border-right:1px solid var(--color-border);overflow-y:auto;max-height:100vh}
+  .scheme-item{cursor:pointer;padding:.5rem 1rem;border-bottom:1px solid var(--color-border);transition:background-color .15s}
+  .scheme-item:hover{background-color:var(--color-muted)}
+  .scheme-item.active{background-color:var(--color-accent);color:var(--color-accent-foreground)}
+  .scheme-item .name{font-weight:500;font-size:.875rem}
+  .scheme-item .author{font-size:.75rem;color:var(--color-muted-foreground)}
+  .preview-panel{padding:2rem;overflow-y:auto;max-height:100vh}
+  .swatch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.5rem}
+  .swatch{border-radius:4px;overflow:hidden}
+  .swatch-color{height:2rem}
+  .swatch-label{padding:.15rem .35rem;font-size:.65rem;font-family:monospace}
+  .swatch-hex{font-size:.6rem;opacity:.7}
+  .search-box input{width:100%;padding:.5rem .75rem;background:var(--color-card);color:var(--color-foreground);border:1px solid var(--color-border);border-radius:6px;font-size:.875rem;outline:none}
+  .search-box input:focus{border-color:var(--color-ring)}
+  .loading{text-align:center;padding:3rem;color:var(--color-muted-foreground)}
+  .error-msg{padding:1rem;color:var(--color-destructive);background:color-mix(in oklch,var(--color-destructive)10%,transparent);border-radius:6px;margin:1rem}
+  @media(max-width:768px){.gallery-layout{grid-template-columns:1fr}.scheme-list{max-height:40vh}.preview-panel{max-height:none}}
+</style>
+</head>
+<body class="bg-background text-foreground">
+
+<div class="gallery-layout">
+  <aside class="scheme-list bg-card">
+    <div class="p-3 border-b border-border">
+      <div class="search-box mb-2"><input type="text" id="search" placeholder="Search schemes…"></div>
+      <div class="flex items-center gap-2 text-xs text-muted-foreground">
+        <span id="scheme-count">Loading…</span>
+      </div>
+    </div>
+    <div id="scheme-items"><div class="loading">Loading schemes from GitHub…</div></div>
+  </aside>
+  <main class="preview-panel">
+    <div id="preview-content"><div class="loading">Select a scheme from the sidebar to preview</div></div>
+  </main>
+</div>
+
+<script src="https://unpkg.com/basecoat-css@1.0.1/dist/js/all.min.js" defer></script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+// Conversion Library
+// ═══════════════════════════════════════════════════════════════════════
+
+function parseYaml(raw) {
+  var scheme = { name:"Unknown", author:"", palette:{}, variant:undefined };
+  var lines = raw.split("\n"), inPalette = false;
+  for (var i = 0; i < lines.length; i++) {
+    var rawLine = lines[i];
+    var ci = rawLine.search(/(?:\s|")#(?:\s|$)/);
+    var line = ci >= 0 ? rawLine.substring(0, ci).trimEnd() : rawLine;
+    var t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+    if (t === "palette:") { inPalette = true; continue; }
+    if (inPalette) {
+      var m = t.match(/^(base[0-9A-Fa-f]{2}):\s*(?:["'])?#?([0-9a-fA-F]{6})(?:["'])?\s*$/);
+      if (m) { scheme.palette[m[1]] = m[2]; continue; }
+      if (!t.startsWith(" ")) inPalette = false; else continue;
+    }
+    var kv = t.match(/^([a-zA-Z_]\w*):\s*(?:["'])?(.+?)(?:["'])?\s*$/);
+    if (kv) { if (kv[1]==="name") scheme.name=kv[2]; if (kv[1]==="author") scheme.author=kv[2]; if (kv[1]==="variant") scheme.variant=kv[2]; }
+  }
+  return scheme;
+}
+
+function hexToRgb(h) { return [parseInt(h.substring(0,2),16)/255, parseInt(h.substring(2,4),16)/255, parseInt(h.substring(4,6),16)/255]; }
+function linearize(c) { return c <= 0.04045 ? c/12.92 : ((c+0.055)/1.055)**2.4; }
+
+function hexToOklch(hex) {
+  var r=hexToRgb(hex)[0], g=hexToRgb(hex)[1], b=hexToRgb(hex)[2];
+  var lr=linearize(r), lg=linearize(g), lb=linearize(b);
+  var x=0.4124564*lr+0.3575761*lg+0.1804375*lb;
+  var y=0.2126729*lr+0.7151522*lg+0.0721750*lb;
+  var z=0.0193339*lr+0.1191920*lg+0.9503041*lb;
+  var l1=0.8189330101*x+0.3618667424*y-0.1288597137*z;
+  var m=0.0329845436*x+0.9293118715*y+0.0361456387*z;
+  var s=0.0482003018*x+0.2643662691*y+0.6338517070*z;
+  var l_=Math.cbrt(l1), m_=Math.cbrt(m), s_=Math.cbrt(s);
+  var L=0.2104542553*l_+0.7936177850*m_-0.0040720468*s_;
+  var A=1.9779984951*l_-2.4285922050*m_+0.4505937099*s_;
+  var B=0.0259040371*l_+0.7827717662*m_-0.8086757660*s_;
+  var C=Math.sqrt(A*A+B*B), H=Math.atan2(B,A)*180/Math.PI;
+  if(H<0)H+=360;
+  return {l:L,c:C,h:H};
+}
+
+function oklchS(c) { return "oklch("+c.l.toFixed(3)+" "+c.c.toFixed(3)+" "+Math.round(c.h)+")"; }
+
+function detectMode(scheme) {
+  if (scheme.variant==="dark") return "dark";
+  if (scheme.variant==="light") return "light";
+  var lum=function(h){var rgb=hexToRgb(h);return 0.2126*linearize(rgb[0])+0.7152*linearize(rgb[1])+0.0722*linearize(rgb[2]);};
+  return lum(scheme.palette.base00) < lum(scheme.palette.base07) ? "dark" : "light";
+}
+
+function getTokenMap(primarySlot) {
+  return [
+    {token:"background",slot:"base00"},{token:"foreground",slot:"base05"},
+    {token:"card",slot:"base01"},{token:"card-foreground",slot:"base05"},
+    {token:"popover",slot:"base01"},{token:"popover-foreground",slot:"base05"},
+    {token:"primary",slot:primarySlot},{token:"primary-foreground",slot:"base00"},
+    {token:"secondary",slot:"base02"},{token:"secondary-foreground",slot:"base05"},
+    {token:"muted",slot:"base01"},{token:"muted-foreground",slot:"base04"},
+    {token:"accent",slot:"base02"},{token:"accent-foreground",slot:"base05"},
+    {token:"destructive",slot:"base08"},{token:"destructive-foreground",slot:"base05"},
+    {token:"border",slot:"base03"},{token:"input",slot:"base03"},
+    {token:"ring",slot:primarySlot},{token:"chart-1",slot:primarySlot},
+    {token:"chart-2",slot:"base0B"},{token:"chart-3",slot:"base0A"},
+    {token:"chart-4",slot:"base0E"},{token:"chart-5",slot:"base08"},
+    {token:"sidebar",slot:"base10",fallback:"base11"},{token:"sidebar-foreground",slot:"base05"},
+    {token:"sidebar-primary",slot:primarySlot},{token:"sidebar-primary-foreground",slot:"base00"},
+    {token:"sidebar-accent",slot:"base01"},{token:"sidebar-accent-foreground",slot:"base05"},
+    {token:"sidebar-border",slot:"base02"},{token:"sidebar-ring",slot:primarySlot},
+  ];
+}
+
+function generateOpposite(palette) {
+  var opp = {};
+  var swaps = [["base00","base07"],["base01","base06"],["base02","base05"],["base03","base04"]];
+  for (var i=0;i<swaps.length;i++) {
+    opp[swaps[i][0]]=oklchS(hexToOklch(palette[swaps[i][1]]));
+    opp[swaps[i][1]]=oklchS(hexToOklch(palette[swaps[i][0]]));
+  }
+  var extraMap = [["base10",0.90],["base11",0.95]];
+  for (var i=0;i<extraMap.length;i++) {
+    var s=extraMap[i][0], tl=extraMap[i][1];
+    if (palette[s]) { var c=hexToOklch(palette[s]); opp[s]=oklchS({l:tl,c:0.02,h:c.h}); }
+  }
+  var accents = ["base08","base09","base0A","base0B","base0C","base0D","base0E","base0F"];
+  for (var i=0;i<accents.length;i++) {
+    var s=accents[i];
+    if (palette[s]) { var c=hexToOklch(palette[s]); opp[s]=oklchS({l:c.l<0.5?0.60:0.55,c:Math.min(c.c,0.15),h:c.h}); }
+  }
+  var brights = ["base12","base13","base14","base15","base16","base17"];
+  for (var i=0;i<brights.length;i++) {
+    var s=brights[i];
+    if (palette[s]) { var c=hexToOklch(palette[s]); opp[s]=oklchS({l:c.l<0.5?Math.max(c.l+0.10,0.50):Math.min(c.l-0.05,0.65),c:Math.min(c.c,0.18),h:c.h}); }
+  }
+  return opp;
+}
+
+function resolveSlot(palette, opp, def, useOpp) {
+  if (useOpp && opp) {
+    if (def.slot && opp[def.slot]) return opp[def.slot];
+    if (def.fallback && opp[def.fallback]) return opp[def.fallback];
+    if (def.token==="sidebar" && opp["base00"]) return opp["base00"];
+  }
+  if (!def.slot) return "";
+  var hex = palette[def.slot];
+  if (hex) return oklchS(hexToOklch(hex));
+  if (def.fallback && palette[def.fallback]) return oklchS(hexToOklch(palette[def.fallback]));
+  if (palette.base00) return oklchS(hexToOklch(palette.base00));
+  return "oklch(1 0 0)";
+}
+
+function generateCSS(scheme, primarySlot, radius, customMappings) {
+  customMappings = customMappings || {};
+  var mode = detectMode(scheme);
+  var opp = generateOpposite(scheme.palette);
+  var tokenMap = getTokenMap(primarySlot);
+  var oppositeLabel = mode==="dark"?"light":"dark";
+  var realSelector = mode==="dark"?".dark":":root";
+  var oppSelector = mode==="dark"?":root":".dark";
+  var lines = [];
+  lines.push("/*"); lines.push(" * base24 theme: "+scheme.name);
+  lines.push(" * Author: "+(scheme.author||"Unknown"));
+  lines.push(" * Generated by base24-to-shadcn");
+  lines.push(" * Only color tokens — radius, spacing, shadows belong to the style pack.");
+  lines.push(" */");
+
+  function emitBlock(sel, comment, useOpp) {
+    if (comment) lines.push("/* "+comment+" */");
+    lines.push(sel+" {");
+    for (var i=0;i<tokenMap.length;i++) {
+      var def = tokenMap[i];
+      var slot = customMappings[def.token] || def.slot;
+      var customDef = {token:def.token, slot:slot, fallback:def.fallback};
+      lines.push("  --"+def.token+": "+resolveSlot(scheme.palette, opp, customDef, useOpp)+";");
+    }
+    lines.push("}"); lines.push("");
+  }
+
+  if (realSelector===":root") {
+    emitBlock(":root",null,false);
+    emitBlock(".dark","Auto-generated "+oppositeLabel+" variant — tweak to taste",true);
+  } else {
+    emitBlock(":root","Auto-generated "+oppositeLabel+" variant — tweak to taste",true);
+    emitBlock(".dark",null,false);
+  }
+
+  lines.push(":root,.dark{");
+  for (var i=0;i<tokenMap.length;i++) {
+    lines.push("  --color-"+tokenMap[i].token+": var(--"+tokenMap[i].token+");");
+  }
+  lines.push("}");
+
+  return lines.join("\n");
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Gallery App
+// ═══════════════════════════════════════════════════════════════════════
+
+var state = {
+  schemes: [],
+  currentScheme: null,
+  currentCSS: "",
+  primarySlot: "base0D",
+  radius: "0.625rem",
+  customMappings: {},
+};
+
+var GH_API = "https://api.github.com/repos/tinted-theming/schemes/contents/base24?ref=spec-0.11";
+
+function esc(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ── Fetch scheme list ──────────────────────────────────────────────
+
+async function fetchSchemeList() {
+  var container = document.getElementById("scheme-items");
+  try {
+    var res = await fetch(GH_API);
+    if (!res.ok) throw new Error("GitHub API: "+res.status);
+    var files = await res.json();
+    state.schemes = files.filter(function(f){return f.name.endsWith(".yaml");})
+      .map(function(f){return {name:f.name.replace(".yaml",""),url:f.download_url};})
+      .sort(function(a,b){return a.name.localeCompare(b.name);});
+    document.getElementById("scheme-count").textContent = state.schemes.length+" schemes";
+    renderSchemeList(state.schemes);
+  } catch(err) {
+    container.innerHTML = '<div class="error-msg">Failed to load schemes: '+err.message+'</div>';
+  }
+}
+
+function renderSchemeList(schemes) {
+  var container = document.getElementById("scheme-items");
+  container.innerHTML = schemes.map(function(s){
+    var dn = s.name.replace(/-/g," ").replace(/\b\w/g,function(c){return c.toUpperCase();});
+    return '<div class="scheme-item" data-name="'+s.name+'" onclick="selectScheme(\''+s.name+'\')"><div class="name">'+dn+'</div></div>';
+  }).join("");
+}
+
+// ── Search ──────────────────────────────────────────────────────────
+
+document.getElementById("search").addEventListener("input", function(e){
+  var q = e.target.value.toLowerCase();
+  var filtered = state.schemes.filter(function(s){return s.name.toLowerCase().includes(q);});
+  renderSchemeList(filtered);
+});
+
+// ── Select scheme ──────────────────────────────────────────────────
+
+async function selectScheme(name, pushState) {
+  // Update URL for sharing (skip on initial load to avoid double push)
+  if (pushState !== false) {
+    var url = new URL(location.href);
+    url.searchParams.set("scheme", name);
+    history.pushState({scheme:name}, "", url);
+  }
+  
+  document.querySelectorAll(".scheme-item").forEach(function(el){el.classList.remove("active");});
+  var item = document.querySelector('.scheme-item[data-name="'+name+'"]');
+  if (item) item.classList.add("active");
+
+  var scheme = state.schemes.find(function(s){return s.name===name;});
+  if (!scheme) return;
+
+  var preview = document.getElementById("preview-content");
+  preview.innerHTML = '<div class="loading">Loading…</div>';
+
+  try {
+    var res = await fetch(scheme.url);
+    if (!res.ok) throw new Error("HTTP "+res.status);
+    var yaml = await res.text();
+    var parsed = parseYaml(yaml);
+    state.customMappings = {};
+    state.currentScheme = parsed;
+    applyTheme();
+  } catch(err) {
+    preview.innerHTML = '<div class="error-msg">Failed: '+err.message+'</div>';
+  }
+}
+
+// ── Apply theme ────────────────────────────────────────────────────
+
+function applyTheme() {
+  if (!state.currentScheme) return;
+  var css = generateCSS(state.currentScheme, state.primarySlot, state.radius, state.customMappings);
+  state.currentCSS = css;
+  document.getElementById("theme-style").textContent = css;
+  if (detectMode(state.currentScheme)==="dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+  renderPreview(state.currentScheme);
+}
+
+// ── Download CSS ───────────────────────────────────────────────────
+
+function downloadCSS() {
+  if (!state.currentCSS) return;
+  var blob = new Blob([state.currentCSS], {type:"text/css"});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = (state.currentScheme?state.currentScheme.name.replace(/\s+/g,"-").toLowerCase():"theme")+".css";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── Render preview ─────────────────────────────────────────────────
+
+function renderPreview(scheme) {
+  var mode = detectMode(scheme);
+  var pal = scheme.palette;
+  var primarySlot = state.primarySlot;
+
+  var allSlots = [];
+  var hexDigits = ["8","9","A","B","C","D","E","F"];
+  for (var i=0;i<=7;i++) allSlots.push("base0"+i);
+  for (var j=0;j<hexDigits.length;j++) allSlots.push("base0"+hexDigits[j]);
+  for (var k=10;k<=17;k++) allSlots.push("base"+k);
+
+  // Build a set of slots used for key semantic roles
+  var roleSlots = {};
+  var tokenMap = getTokenMap(primarySlot);
+  for (var i=0;i<tokenMap.length;i++) {
+    var d = tokenMap[i];
+    if (d.slot && !roleSlots[d.slot]) roleSlots[d.slot] = [];
+    if (d.slot) roleSlots[d.slot].push(d.token);
+  }
+  // Only keep the first 3 roles per slot to avoid clutter
+  for (var s in roleSlots) {
+    if (roleSlots[s].length > 3) roleSlots[s] = roleSlots[s].slice(0,3).concat(["…"]);
+  }
+
+  var swatches = allSlots.filter(function(s){return pal[s];}).map(function(s){
+    var isPrimary = s === primarySlot;
+    var roles = roleSlots[s] || [];
+    var roleLabel = roles.length ? roles.slice(0,2).join(", ") : "";
+    return '<div class="swatch'+(isPrimary?' ring-2 ring-inset':'')+'" style="'+(isPrimary?'box-shadow:0 0 0 2px var(--color-ring);border-radius:6px;':'')+'">'+
+      '<div class="swatch-color" style="background:#'+pal[s]+'"></div>'+
+      '<div class="swatch-label">'+s+(isPrimary?' ← PRIMARY':'')+'</div>'+
+      (roleLabel?'<div class="swatch-hex">'+roleLabel+'</div>':'<div class="swatch-hex">#'+pal[s]+'</div>')+
+    '</div>';
+  }).join("");
+
+  var chartSlots = [primarySlot,"base0B","base0A","base0E","base08"];
+  var chartBars = chartSlots.filter(function(s){return pal[s];}).map(function(s){
+    return '<div class="flex-1 h-6 rounded" style="background:'+oklchS(hexToOklch(pal[s]))+'" title="'+s+': #'+pal[s]+'"></div>';
+  }).join("");
+
+  var preview = document.getElementById("preview-content");
+  preview.innerHTML =
+    '<div class="mb-6"><div class="flex items-center justify-between"><div>'+
+    '<h1 class="text-xl font-bold">'+esc(scheme.name)+'</h1>'+
+    '<p class="text-muted-foreground text-sm mt-0.5">by '+esc(scheme.author)+'</p>'+
+    '<span class="inline-block mt-1.5 px-2 py-0.5 text-xs rounded bg-secondary text-secondary-foreground font-mono">'+
+    (mode==="dark"?"🌙 Dark":"☀️ Light")+' scheme</span>'+
+    '<a href="#" onclick="downloadCSS();return false" class="inline-block mt-1.5 ml-2 text-xs text-primary hover:underline">CSS ↓</a>'+
+    '<a href="/browse?scheme='+esc(scheme.name.replace(/\s+/g,'-').toLowerCase())+'&primary='+esc(primarySlot)+'" target="_blank" class="inline-block mt-1.5 ml-2 text-xs text-primary hover:underline">Open in Basecoat ↗</a>'+
+    '<label class="flex items-center gap-2 text-sm text-muted-foreground">Primary:'+
+    '<select id="primary-select" class="select text-sm" onchange="changePrimary(this.value)">'+
+    allSlots.filter(function(s){return pal[s];}).map(function(s){
+      return '<option value="'+s+'"'+(s===primarySlot?' selected':'')+'>'+s+'</option>';
+    }).join("")+
+    '</select></label></div></div>'+
+
+    '<section class="mb-6"><h2 class="text-sm font-semibold mb-2 text-muted-foreground">Buttons</h2>'+
+    '<div class="flex flex-wrap gap-2 mb-2">'+
+    '<button class="btn" data-variant="primary">Primary</button>'+
+    '<button class="btn" data-variant="secondary">Secondary</button>'+
+    '<button class="btn" data-variant="destructive">Destructive</button>'+
+    '<button class="btn" data-variant="outline">Outline</button>'+
+    '<button class="btn" data-variant="ghost">Ghost</button></div>'+
+    '<div class="flex flex-wrap items-end gap-2">'+
+    '<button class="btn" data-variant="primary" data-size="sm">Small</button>'+
+    '<button class="btn" data-variant="primary">Default</button>'+
+    '<button class="btn" data-variant="primary" data-size="lg">Large</button></div></section>'+
+
+    '<section class="mb-6"><h2 class="text-sm font-semibold mb-2 text-muted-foreground">Card</h2>'+
+    '<div class="card max-w-md"><header><h3 class="text-base font-semibold">'+esc(scheme.name)+'</h3>'+
+    '<p class="text-sm text-muted-foreground">A base24 color scheme preview</p></header>'+
+    '<section><p>Cards elevate content above the background.</p></section>'+
+    '<footer class="flex gap-2"><button class="btn" data-variant="primary" data-size="sm">Action</button>'+
+    '<button class="btn" data-variant="ghost" data-size="sm">Cancel</button></footer></div></section>'+
+
+    '<section class="mb-6"><h2 class="text-sm font-semibold mb-2 text-muted-foreground">Inputs</h2>'+
+    '<div class="flex flex-wrap gap-3 items-end max-w-lg">'+
+    '<div class="flex-1 min-w-[180px]"><label class="block text-xs mb-1 text-muted-foreground">Text Input</label>'+
+    '<input class="input" type="text" placeholder="Type something…"></div>'+
+    '<div class="flex-1 min-w-[180px]"><label class="block text-xs mb-1 text-muted-foreground">Select</label>'+
+    '<select class="select"><option>Option One</option><option>Option Two</option><option>Option Three</option></select></div></div></section>'+
+
+    '<section class="mb-6"><h2 class="text-sm font-semibold mb-2 text-muted-foreground">Badges</h2>'+
+    '<div class="flex flex-wrap gap-2">'+
+    '<span class="badge" data-variant="primary">Primary</span>'+
+    '<span class="badge" data-variant="secondary">Secondary</span>'+
+    '<span class="badge" data-variant="destructive">Destructive</span>'+
+    '<span class="badge" data-variant="outline">Outline</span></div></section>'+
+
+    '<section class="mb-6"><h2 class="text-sm font-semibold mb-2 text-muted-foreground">Alerts</h2>'+
+    '<div class="flex flex-col gap-2 max-w-lg">'+
+    '<div class="alert" data-variant="info"><strong>Info:</strong> This is an informational alert.</div>'+
+    '<div class="alert" data-variant="success"><strong>Success:</strong> Operation completed.</div>'+
+    '<div class="alert" data-variant="warning"><strong>Warning:</strong> Proceed with caution.</div>'+
+    '<div class="alert" data-variant="error"><strong>Error:</strong> Something went wrong.</div></div></section>'+
+
+    '<section class="mb-6"><h2 class="text-sm font-semibold mb-2 text-muted-foreground">Form</h2>'+
+    '<div class="card max-w-lg"><section class="flex flex-col gap-4">'+
+    '<div class="flex gap-3"><div class="flex-1"><label class="block text-xs mb-1 text-muted-foreground">Name</label>'+
+    '<input class="input w-full" type="text" placeholder="Your name"></div>'+
+    '<div class="flex-1"><label class="block text-xs mb-1 text-muted-foreground">Email</label>'+
+    '<input class="input w-full" type="email" placeholder="you@example.com"></div></div>'+
+    '<div><label class="block text-xs mb-1 text-muted-foreground">Password</label>'+
+    '<input class="input w-full" type="password" placeholder="••••••••"></div>'+
+    '<div><label class="block text-xs mb-1 text-muted-foreground">Bio</label>'+
+    '<textarea class="textarea min-h-16 w-full" placeholder="Tell us about yourself…" style="background:transparent;color:var(--color-foreground);border:1px solid var(--color-border);border-radius:8px;padding:.5rem .625rem;font-size:.875rem;width:100%;resize:vertical"></textarea></div>'+
+    '<div class="flex items-center gap-4">'+
+    '<label class="flex items-center gap-2 text-sm"><input class="input" type="checkbox" checked> Subscribe to newsletter</label>'+
+    '<label class="flex items-center gap-2 text-sm"><input class="input" type="checkbox"> Accept terms</label></div>'+
+    '<div><label class="block text-xs mb-1 text-muted-foreground">Role</label>'+
+    '<select class="select w-full"><option>Developer</option><option>Designer</option><option>Manager</option></select></div>'+
+    '<div class="flex gap-2"><button class="btn" data-variant="primary">Submit</button>'+
+    '<button class="btn" data-variant="outline">Cancel</button></div>'+
+    '</section></div></section>'+
+
+    '<section class="mb-6"><h2 class="text-sm font-semibold mb-2 text-muted-foreground">Palette ('+Object.keys(pal).length+' slots)</h2>'+
+    '<div class="swatch-grid">'+swatches+'</div></section>'+
+
+    '<section class="mb-6"><h2 class="text-sm font-semibold mb-2 text-muted-foreground">Chart Colors</h2>'+
+    '<div class="flex gap-1 rounded overflow-hidden border border-border max-w-md">'+chartBars+'</div></section>'+
+
+    '<!-- Customize Variables -->'+
+    '<section class="mb-6 border border-border rounded-lg overflow-hidden">'+
+    '<div class="px-4 py-2 flex items-center justify-between border-b border-border">'+
+    '<span class="text-sm font-semibold text-muted-foreground">Customize CSS Variables</span>'+
+    '<button class="text-xs text-destructive hover:underline" onclick="resetAllMappings()">Reset All</button></div>'+
+    '<div class="p-4" id="custom-mappings"></div></section>';
+
+  setTimeout(function(){ renderCustomMappings(scheme); }, 0);
+}
+
+// ── Primary slot ───────────────────────────────────────────────────
+
+function changePrimary(slot) {
+  state.primarySlot = slot;
+  applyTheme();
+}
+
+// ── Custom mappings ────────────────────────────────────────────────
+
+function renderCustomMappings(scheme) {
+  var container = document.getElementById("custom-mappings");
+  if (!container) return;
+  var allSlots = [];
+  var hexDigits = ["8","9","A","B","C","D","E","F"];
+  for (var i=0;i<=7;i++) allSlots.push("base0"+i);
+  for (var j=0;j<hexDigits.length;j++) allSlots.push("base0"+hexDigits[j]);
+  for (var k=10;k<=17;k++) allSlots.push("base"+k);
+  var availSlots = allSlots.filter(function(s){return scheme.palette[s];});
+  var tokenMap = getTokenMap(state.primarySlot);
+  var colorTokens = tokenMap.filter(function(d){return d.slot && d.token!=="radius";});
+
+  container.innerHTML = colorTokens.map(function(def){
+    var currentSlot = state.customMappings[def.token] || def.slot;
+    var hex = scheme.palette[currentSlot] || "ccc";
+    var options = availSlots.map(function(s){
+      return '<option value="'+s+'"'+(s===currentSlot?' selected':'')+'>'+s+'</option>';
+    }).join("");
+    return '<div class="flex items-center gap-2 py-1 border-b border-border last:border-0 text-xs">'+
+      '<span class="w-32 font-mono text-muted-foreground truncate">--'+esc(def.token)+'</span>'+
+      '<span class="w-4 h-4 rounded border border-border shrink-0" style="background:#'+hex+'"></span>'+
+      '<select class="text-xs bg-background text-foreground border border-border rounded px-1 py-0.5 max-w-[90px]" onchange="applyCustomMapping(\''+esc(def.token)+'\',this.value)" onclick="event.stopPropagation()">'+options+'</select>'+
+      (state.customMappings[def.token]?'<button class="text-xs text-destructive hover:underline shrink-0" onclick="event.stopPropagation();applyCustomMapping(\''+esc(def.token)+'\',null)">×</button>':'')+
+    '</div>';
+  }).join("");
+}
+
+function applyCustomMapping(token, slot) {
+  if (slot) { state.customMappings[token] = slot; }
+  else { delete state.customMappings[token]; }
+  applyTheme();
+}
+
+function resetAllMappings() {
+  state.customMappings = {};
+  applyTheme();
+}
+
+// ── Toggle dark/light ──────────────────────────────────────────────
+
+// ── Keyboard nav ───────────────────────────────────────────────────
+
+document.addEventListener("keydown", function(e){
+  if (e.key==="ArrowDown"||e.key==="ArrowUp") {
+    var items = Array.from(document.querySelectorAll(".scheme-item"));
+    var current = items.findIndex(function(el){return el.classList.contains("active");});
+    var next = e.key==="ArrowDown"?Math.min(current+1,items.length-1):Math.max(current-1,0);
+    if (items[next]) selectScheme(items[next].dataset.name);
+    e.preventDefault();
+  }
+});
+
+// ── Bootstrap ──────────────────────────────────────────────────────
+
+fetchSchemeList().then(function(){
+  if (state.schemes.length > 0) {
+    var params = new URLSearchParams(location.search);
+    var urlScheme = params.get("scheme");
+    var pick = urlScheme && state.schemes.find(function(s){return s.name===urlScheme;})
+      ? urlScheme
+      : (state.schemes.find(function(s){return s.name==="one-dark";}) || state.schemes[0]).name;
+    selectScheme(pick, false);
+  }
+});
+
+window.addEventListener("popstate", function(e){
+  if (e.state && e.state.scheme) {
+    selectScheme(e.state.scheme, false);
+  }
+});
+
+</script>
+</body>
+</html>
