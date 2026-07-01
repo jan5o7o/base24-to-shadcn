@@ -362,13 +362,9 @@ function applyTheme() {
 
 function downloadCSS() {
   if (!state.currentCSS) return;
-  var blob = new Blob([state.currentCSS], {type:"text/css"});
+  var blob = new Blob([state.currentCSS], {type:"text/plain"});
   var url = URL.createObjectURL(blob);
-  var a = document.createElement("a");
-  a.href = url;
-  a.download = (state.currentScheme?state.currentScheme.name.replace(/\s+/g,"-").toLowerCase():"theme")+".css";
-  a.click();
-  URL.revokeObjectURL(url);
+  window.open(url, "_blank");
 }
 
 // ── Render preview ─────────────────────────────────────────────────
