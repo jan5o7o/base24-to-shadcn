@@ -52,14 +52,14 @@ tailwind.config = {
   :is(.field>input[type=checkbox],.input[type=checkbox]):checked{color:var(--background)!important}
   :root,.dark{--color-background:var(--background);--color-foreground:var(--foreground);--color-card:var(--card);--color-card-foreground:var(--card-foreground);--color-popover:var(--popover);--color-popover-foreground:var(--popover-foreground);--color-primary:var(--primary);--color-primary-foreground:var(--primary-foreground);--color-secondary:var(--secondary);--color-secondary-foreground:var(--secondary-foreground);--color-muted:var(--muted);--color-muted-foreground:var(--muted-foreground);--color-accent:var(--accent);--color-accent-foreground:var(--accent-foreground);--color-destructive:var(--destructive);--color-border:var(--border);--color-input:var(--input);--color-ring:var(--ring);--color-chart-1:var(--chart-1);--color-chart-2:var(--chart-2);--color-chart-3:var(--chart-3);--color-chart-4:var(--chart-4);--color-chart-5:var(--chart-5);--color-sidebar:var(--sidebar);--color-sidebar-foreground:var(--sidebar-foreground);--color-sidebar-primary:var(--sidebar-primary);--color-sidebar-primary-foreground:var(--sidebar-primary-foreground);--color-sidebar-accent:var(--sidebar-accent);--color-sidebar-accent-foreground:var(--sidebar-accent-foreground);--color-sidebar-border:var(--sidebar-border);--color-sidebar-ring:var(--sidebar-ring)}
   body{font-family:system-ui,-apple-system,sans-serif}
-  .gallery-layout{display:grid;grid-template-columns:320px 1fr;min-height:100vh}
-  .scheme-list{border-right:1px solid var(--color-border);overflow-y:auto;max-height:100vh}
+  .gallery-layout{display:grid;grid-template-columns:320px 1fr;height:calc(100vh - 3rem)}
+  .scheme-list{border-right:1px solid var(--color-border);overflow-y:auto;max-height:calc(100vh - 3rem)}
   .scheme-item{cursor:pointer;padding:.5rem 1rem;border-bottom:1px solid var(--color-border);transition:background-color .15s}
   .scheme-item:hover{background-color:var(--color-muted)}
   .scheme-item.active{background-color:var(--color-accent);color:var(--color-accent-foreground)}
   .scheme-item .name{font-weight:500;font-size:.875rem}
   .scheme-item .author{font-size:.75rem;color:var(--color-muted-foreground)}
-  .preview-panel{padding:2rem;overflow-y:auto;max-height:100vh}
+  .preview-panel{padding:2rem;overflow-y:auto;max-height:calc(100vh - 3rem)}
   .swatch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.5rem}
   .swatch{border-radius:4px;overflow:hidden}
   .swatch-color{height:2rem}
@@ -73,6 +73,13 @@ tailwind.config = {
 </style>
 </head>
 <body class="bg-background text-foreground">
+
+<!-- Top nav -->
+<nav class="sticky top-0 z-40 flex items-center h-12 px-4 border-b border-border bg-background/80 backdrop-blur">
+  <a href="/" class="text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">← base24-to-shadcn</a>
+  <span class="flex-1"></span>
+  <span class="text-xs text-muted-foreground" id="nav-scheme-name"></span>
+</nav>
 
 <div class="gallery-layout">
   <aside class="scheme-list bg-card">
@@ -88,7 +95,6 @@ tailwind.config = {
     <div id="preview-content"><div class="loading">Select a scheme from the sidebar to preview</div></div>
   </main>
 </div>
-
 <script src="https://unpkg.com/basecoat-css@1.0.1/dist/js/all.min.js" defer></script>
 
 <script>
@@ -401,21 +407,16 @@ function renderPreview(scheme) {
       (roleLabel?'<div class="swatch-hex">'+roleLabel+'</div>':'<div class="swatch-hex">#'+pal[s]+'</div>')+
     '</div>';
   }).join("");
-
-  var chartSlots = [primarySlot,"base0B","base0A","base0E","base08"];
-  var chartBars = chartSlots.filter(function(s){return pal[s];}).map(function(s){
-    return '<div class="flex-1 h-6 rounded" style="background:'+oklchS(hexToOklch(pal[s]))+'" title="'+s+': #'+pal[s]+'"></div>';
-  }).join("");
-
   var preview = document.getElementById("preview-content");
   preview.innerHTML =
-    '<div class="mb-6"><div class="flex items-center justify-between"><div>'+
-    '<h1 class="text-xl font-bold">'+esc(scheme.name)+'</h1>'+
-    '<p class="text-muted-foreground text-sm mt-0.5">by '+esc(scheme.author)+'</p>'+
-    '<span class="inline-block mt-1.5 px-2 py-0.5 text-xs rounded bg-secondary text-secondary-foreground font-mono">'+
-    (mode==="dark"?"🌙 Dark":"☀️ Light")+' scheme</span>'+
-    '<a href="#" onclick="downloadCSS();return false" class="inline-block mt-1.5 ml-2 text-xs text-primary hover:underline">CSS ↓</a>'+
-    '<a href="/browse?scheme='+esc(scheme.name.replace(/\s+/g,'-').toLowerCase())+'&primary='+esc(primarySlot)+'" target="_blank" class="inline-block mt-1.5 ml-2 text-xs text-primary hover:underline">Open in Basecoat ↗</a>'+
+    '<div class="mb-8"><div class="flex flex-wrap items-start justify-between gap-4"><div>'+
+    '<h1 class="text-2xl font-bold tracking-tight">'+esc(scheme.name)+'</h1>'+
+    '<p class="text-muted-foreground text-sm mt-1">by '+esc(scheme.author)+' — '+
+    '<span class="font-mono text-xs">'+(mode==="dark"?"🌙 dark scheme":"☀️ light scheme")+'</span></p>'+
+    '<div class="flex flex-wrap gap-2 mt-3">'+
+    '<a href="#" onclick="downloadCSS();return false" class="btn" data-variant="outline" data-size="sm">📥 Download CSS</a>'+
+    '<a href="/browse?scheme='+esc(scheme.name.replace(/\s+/g,'-').toLowerCase())+'&primary='+esc(primarySlot)+'" target="_blank" class="btn" data-variant="secondary" data-size="sm">↗ Open in Basecoat UI</a>'+
+    '</div></div>'+
     '<label class="flex items-center gap-2 text-sm text-muted-foreground">Primary:'+
     '<select id="primary-select" class="select text-sm" onchange="changePrimary(this.value)">'+
     allSlots.filter(function(s){return pal[s];}).map(function(s){
@@ -496,6 +497,9 @@ function renderPreview(scheme) {
     '<div class="p-4" id="custom-mappings"></div></section>';
 
   setTimeout(function(){ renderCustomMappings(scheme); }, 0);
+  // Update nav bar with scheme name
+  var navEl = document.getElementById("nav-scheme-name");
+  if (navEl) navEl.textContent = scheme.name;
 }
 
 // ── Primary slot ───────────────────────────────────────────────────
