@@ -1,0 +1,14 @@
+{
+  "name": "base24-to-shadcn",
+  "version": "1.0.0",
+  "description": "Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat UI",
+  "type": "module",
+  "scripts": {
+    "convert": "bun src/cli.ts",
+    "serve": "bun src/server.ts",
+    "start": "bun src/server.ts"
+  },
+  "keywords": ["base24", "shadcn", "basecoat", "theme", "oklch", "css"],
+  "license": "MIT",
+  "repository": "github:jan5o7o/base24-to-shadcn"
+}

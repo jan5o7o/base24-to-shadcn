@@ -6,9 +6,9 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 
 | File | Purpose |
 |---|---|
-| `convert.ts` | CLI: `bun convert.ts <scheme.yaml> [-o theme.css] [-p base0D] [-r 0.625rem] [--preview]` |
-| `server.ts` | Bun HTTP server on port 3000: gallery + basecoat proxy + CSS API |
-| `gallery.html` | Self-contained browser gallery (190 schemes, live preview, CSS customizer) |
+| `src/cli.ts` | CLI: `bun src/cli.ts <scheme.yaml> [-o theme.css] [-p base0D] [-r 0.625rem] [--preview]` |
+| `src/server.ts` | Bun HTTP server on port 3000: gallery + basecoat proxy + CSS API |
+| `public/gallery.html` | Self-contained browser gallery (190 schemes, live preview, CSS customizer) |
 | `README.md` | Full documentation |
 
 ## Key Conventions
@@ -25,7 +25,7 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 ## Server Routes
 
 ```
-/                                gallery.html
+/                                public/gallery.html
 /?scheme=<name>                  gallery with specific scheme
 /browse?scheme=<name>            basecoatui.com proxied + theme injected
 /browse?scheme=<name>&style=<s>  same with style pack (vega/nova/…)
@@ -38,25 +38,25 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 ## Common Tasks
 
 ### Add a new feature to the gallery
-- Edit `gallery.html` — the `renderPreview` function builds the component showcase
+- Edit `public/gallery.html` — the `renderPreview` function builds the component showcase
 - `generateCSS` produces the theme CSS, `applyTheme` injects it
 - `state.customMappings` holds CSS var → palette slot overrides
 - Cascade fixes are in the static `<style>` block (needed for Tailwind v3 CDN)
 
 ### Fix the browse proxy
-- `server.ts` line ~155: `if (url.pathname.startsWith('/browse'))` handler
+- `src/server.ts` line ~155: `if (url.pathname.startsWith('/browse'))` handler
 - Base tag, hx-boost stripping, resource URL rewriting are there
 - Floating picker HTML + injected script (click interceptor, style switcher, theme reapply)
 
 ### Update Basecoat version
-- `convert.ts`: `BASECOAT_VERSION` and `BASECOAT_CDN` constants
-- `server.ts`: `BASECOAT_VERSION` constant
-- `gallery.html`: hardcoded CDN URLs in `<link>` and `<script>` tags
+- `src/cli.ts`: `BASECOAT_VERSION` and `BASECOAT_CDN` constants
+- `src/server.ts`: `BASECOAT_VERSION` constant
+- `public/gallery.html`: hardcoded CDN URLs in `<link>` and `<script>` tags
 
 ### Fix the cascade (Tailwind v3 Preflight breaking Basecoat)
 - Add explicit `background-color`, `color`, `border-color` rules for `.btn`, `.badge`, `.card`, `.input`, `.select`, `.alert` variants
 - Add hover rules with `color-mix(in oklab, …)`
-- File locations: gallery.html `<style>` block, server.ts `generateCSS` function
+- File locations: public/gallery.html `<style>` block, src/server.ts `generateCSS` function
 
 ## Gotchas
 

@@ -5,20 +5,24 @@ Convert any [tinted-theming base24](https://github.com/tinted-theming/base24) co
 ## Quick Start
 
 ```bash
-bun convert.ts <scheme.yaml> [-o theme.css] [-p base0D] [-r 0.625rem] [--preview]
+```bash
+bun src/cli.ts <scheme.yaml> [-o theme.css] [-p base0D] [-r 0.625rem] [--preview]
 ```
 
-### Examples
+Or via npm script:
 
 ```bash
+bun run convert -- <scheme.yaml> [-o theme.css] [-p base0D] [-r 0.625rem] [--preview]
+```
+```bash
 # Convert a local scheme
-bun convert.ts ~/schemes/one-dark.yaml -o theme.css
+bun src/cli.ts ~/schemes/one-dark.yaml -o theme.css
 
 # Convert from URL + generate preview HTML
-bun convert.ts https://raw.githubusercontent.com/tinted-theming/schemes/spec-0.11/base24/one-dark.yaml -o theme.css --preview
+bun src/cli.ts https://raw.githubusercontent.com/tinted-theming/schemes/spec-0.11/base24/one-dark.yaml -o theme.css --preview
 
 # Use magenta as primary, custom border radius
-bun convert.ts one-dark.yaml -p base0E -r 0.75rem
+bun src/cli.ts one-dark.yaml -p base0E -r 0.75rem
 ```
 
 ### Flags
@@ -90,7 +94,7 @@ Each CSS file has an attribution header:
 Run the gallery + proxy server:
 
 ```bash
-bun server.ts
+bun src/server.ts
 ```
 
 ### Pages
@@ -130,21 +134,21 @@ bun server.ts
 ## Files
 
 ```
-convert.ts      CLI: single-scheme converter, outputs theme.css + preview.html
-server.ts       Bun HTTP server: gallery + basecoatui.com proxy + CSS API
-gallery.html    Self-contained browser gallery (served by server.ts)
+src/cli.ts      CLI: single-scheme converter, outputs theme.css + preview.html
+src/server.ts       Bun HTTP server: gallery + basecoatui.com proxy + CSS API
+gallery.html    Self-contained browser gallery (served by src/server.ts)
 ```
 
 ## Architecture
 
-### convert.ts (CLI)
+### src/cli.ts (CLI)
 
 - **No dependencies** — self-contained TypeScript, runnable with `bun`
 - Parses YAML inline (flat + nested formats, inline comments)
 - Full Björn Ottosson hex→oklch conversion (D65, gamma 2.2)
 - Generates standalone `theme.css` and optional `preview.html`
 
-### server.ts
+### src/server.ts
 
 - **Proxy mode** — fetches basecoatui.com pages, strips `hx-boost`, injects theme CSS + floating picker
 - **CSS API** — `/theme.css?scheme=name` returns raw CSS with attribution header
