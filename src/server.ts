@@ -148,8 +148,8 @@ const server = Bun.serve({
       if (hasTheme && mode === 'dark') {
         html = html.replace('<html lang="en">', '<html lang="en" class="dark">');
       }
-      // Inject picker into site header (right side), script after body
-      html = html.replace(/(<header[^>]*>[\s\S]*?<\/header>)/, '$1' + picker);
+      // Inject picker into site header, script after body
+      html = html.replace(/(<header class="bg-background sticky[\s\S]*?)(<\/header>)/, '$1' + picker + '$2');
       html = html.replace(/<body[^>]*>/, '$&' + script);
       
       return new Response(html, {
