@@ -99,7 +99,7 @@ const server = Bun.serve({
       const stylePacks = ['vega','nova','maia','lyra','mira','luma','sera','rhea'];
       const styleOpts = stylePacks.map(s => '<option value="' + s + '"' + (s === currentStyle ? ' selected' : '') + '>' + s[0].toUpperCase() + s.slice(1) + '</option>').join('');
       
-      const picker = '<div id="base24-picker" style="position:fixed;top:8px;right:8px;z-index:9999;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--foreground);box-shadow:0 2px 8px rgba(0,0,0,.15);font-family:system-ui,sans-serif;">' +
+      const picker = '<div id="base24-picker" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--foreground);font-family:system-ui,sans-serif;">' +
         '<span style="opacity:.5;">Style:</span>' +
         '<select onchange="window._base24SwitchStyle(this.value)" style="background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;max-width:72px;">' + styleOpts + '</select>' +
         '<span style="opacity:.5;">Color:</span>' +
@@ -148,7 +148,9 @@ const server = Bun.serve({
       if (hasTheme && mode === 'dark') {
         html = html.replace('<html lang="en">', '<html lang="en" class="dark">');
       }
-      html = html.replace(/<body[^>]*>/, '$&' + picker + script);
+      // Inject picker into site header (right side), script after body
+      html = html.replace(/(<header[^>]*>[\s\S]*?<\/header>)/, '$1' + picker);
+      html = html.replace(/<body[^>]*>/, '$&' + script);
       
       return new Response(html, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
