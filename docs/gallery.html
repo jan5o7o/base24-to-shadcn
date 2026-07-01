@@ -275,6 +275,25 @@ function esc(s) {
   return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
+function authorLink(scheme) {
+  var author = scheme.author || "";
+  // Split on commas, link only parts that contain a URL in parens
+  var parts = author.split(/,\s*/);
+  var linked = [];
+  for (var i = 0; i < parts.length; i++) {
+    var p = parts[i];
+    var pm = p.match(/\(https?:\/\/[^)]+\)/);
+    if (pm) {
+      var pu = pm[0].slice(1, -1);
+      var pn = p.replace(pm[0], "").trim();
+      linked.push('<a href="'+esc(pu)+'" target="_blank" class="hover:underline" style="color:inherit">'+esc(pn)+'</a>');
+    } else {
+      linked.push(esc(p));
+    }
+  }
+  return linked.join(", ");
+}
+
 // ── Fetch scheme list ──────────────────────────────────────────────
 
 async function fetchSchemeList() {
@@ -412,7 +431,7 @@ function renderPreview(scheme) {
   preview.innerHTML =
     '<div class="mb-8"><div class="flex flex-wrap items-start justify-between gap-4"><div>'+
     '<h1 class="text-2xl font-bold tracking-tight"><a href="' + (scheme.url ? scheme.url.replace('raw.githubusercontent.com','github.com').replace('/spec-0.11/','/blob/spec-0.11/') : '#') + '" target="_blank" class="hover:underline" style="color:inherit">'+esc(scheme.name)+'</a></h1>'+
-    '<p class="text-muted-foreground text-sm mt-1">by <a href="' + (scheme.url ? 'https://github.com/' + scheme.url.split('/')[3] : '#') + '" target="_blank" class="hover:underline" style="color:inherit">'+esc(scheme.author)+'</a> — '+
+    '<p class="text-muted-foreground text-sm mt-1">by '+authorLink(scheme)+' — '+
     '<span class="font-mono text-xs">'+(mode==="dark"?"🌙 dark scheme":"☀️ light scheme")+'</span></p>'+
     '<div class="flex flex-wrap gap-2 mt-3">'+
     '<a href="#" onclick="downloadCSS();return false" class="btn" data-variant="outline" data-size="sm">📥 Download CSS</a>'+
