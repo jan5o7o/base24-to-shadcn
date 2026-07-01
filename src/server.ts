@@ -190,7 +190,7 @@ const server = Bun.serve({
     let path = url.pathname;
     if (path === "/") path = "/index.html";
     if (path === "/gallery") path = "/gallery.html";
-    const file = Bun.file("./public" + path);
+    const file = Bun.file("./docs" + path);
     if (await file.exists()) {
       return new Response(file);
     }
