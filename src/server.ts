@@ -99,13 +99,13 @@ const server = Bun.serve({
       const stylePacks = ['vega','nova','maia','lyra','mira','luma','sera','rhea'];
       const styleOpts = stylePacks.map(s => '<option value="' + s + '"' + (s === currentStyle ? ' selected' : '') + '>' + s[0].toUpperCase() + s.slice(1) + '</option>').join('');
       
-      const picker = '<div id="base24-picker" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--foreground);font-family:system-ui,sans-serif;">' +
-        '<span style="opacity:.5;">Style:</span>' +
-        '<select onchange="window._base24SwitchStyle(this.value)" style="background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;max-width:72px;">' + styleOpts + '</select>' +
-        '<span style="opacity:.5;">Color:</span>' +
-        '<select onchange="window._base24Navigate(this.value)" style="background:var(--background);color:var(--foreground);border:1px solid var(--border);border-radius:4px;padding:2px 4px;font-size:11px;max-width:100px;">' + dropdownOpts + '</select>' +
-        (hasTheme ? '<a href="' + cssUrl + '" target="_blank" style="color:var(--primary);text-decoration:none;white-space:nowrap;font-size:11px;" title="Download theme.css">CSS</a>' : '') +
-        (ghUrl ? '<a href="' + ghUrl + '" target="_blank" style="color:var(--muted-foreground);text-decoration:none;white-space:nowrap;font-size:11px;" title="View source on GitHub">↗</a>' : '') +
+      const picker = '<div id="base24-picker" style="display:flex;align-items:center;gap:6px;font-family:system-ui,sans-serif;">' +
+        '<span style="opacity:.7;">Style:</span>' +
+        '<select onchange="window._base24SwitchStyle(this.value)" style="background:transparent;color:inherit;border:1px solid;border-radius:4px;padding:1px 4px;font-size:11px;max-width:72px;">' + styleOpts + '</select>' +
+        '<span style="opacity:.7;">Color:</span>' +
+        '<select onchange="window._base24Navigate(this.value)" style="background:transparent;color:inherit;border:1px solid;border-radius:4px;padding:1px 4px;font-size:11px;max-width:100px;">' + dropdownOpts + '</select>' +
+        (hasTheme ? '<a href="' + cssUrl + '" target="_blank" style="color:inherit;opacity:.7;text-decoration:none;font-size:11px;" title="Download theme.css">CSS</a>' : '') +
+        (ghUrl ? '<a href="' + ghUrl + '" target="_blank" style="color:inherit;opacity:.7;text-decoration:none;font-size:11px;" title="View source on GitHub">↗</a>' : '') +
         '</div>';
       const script = '<script>' +
         'window._base24Path="' + currentPath + '";' +
