@@ -46,7 +46,18 @@ tailwind.config = {
   <h2 class="text-3xl font-bold mb-8 text-[#c0caf5]">Quick Start</h2>
 
   <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 mb-6">
-    <p class="text-sm text-[#787c99] mb-3">Convert a base24 scheme YAML to a shadcn/ui theme.css:</p>
+    <p class="text-sm text-[#787c99] mb-3">No install — open the gallery, pick a theme, download:</p>
+    <div class="flex items-center gap-3 text-sm">
+      <a href="/gallery" class="px-4 py-2 rounded-lg bg-[#7aa2f7] text-[#1a1b26] font-semibold hover:bg-[#89b4ff] transition-colors no-underline">🎨 Visit Gallery</a>
+      <span class="text-[#565f89]">→</span>
+      <span class="text-[#a9b1d6]">choose a scheme</span>
+      <span class="text-[#565f89]">→</span>
+      <span class="text-[#a9b1d6]">📥 Download CSS</span>
+    </div>
+  </div>
+
+  <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 mb-6">
+    <p class="text-sm text-[#787c99] mb-3">Or use the CLI — convert a base24 scheme YAML to a shadcn/ui theme.css:</p>
     <pre class="text-sm"><code class="text-[#9ece6a]">bun src/cli.ts</code> <code class="text-[#7dcfff]">scheme.yaml</code> <code class="text-[#787c99]">-o theme.css</code></pre>
   </div>
 
@@ -61,9 +72,9 @@ tailwind.config = {
   </div>
 
   <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6">
-    <p class="text-sm text-[#787c99] mb-3">Start the gallery + proxy server:</p>
+    <p class="text-sm text-[#787c99] mb-3">Run the dev server (localhost only):</p>
     <pre class="text-sm"><code class="text-[#9ece6a]">bun src/server.ts</code></pre>
-    <p class="text-xs text-[#565f89] mt-2">Opens at <code class="text-[#787c99]">http://localhost:3000</code> — gallery, Basecoat UI proxy, CSS API.</p>
+    <p class="text-xs text-[#565f89] mt-2">Opens at <code class="text-[#787c99]">http://localhost:3001</code> — gallery, Basecoat UI proxy (localhost only), CSS API.</p>
   </div>
 </section>
 
