@@ -37,7 +37,7 @@ async function getSchemeCSS(name, primarySlot, stylePack) {
 
 // ── Server ─────────────────────────────────────────────────────────
 const server = Bun.serve({
-  port: 3000,
+  port: 3001,
   async fetch(req) {
     const url = new URL(req.url);
     
@@ -94,7 +94,7 @@ const server = Bun.serve({
       html = html.replace('</head>', '<style>:is(.field>input[type=checkbox],.input[type=checkbox]):checked{color:var(--background)!important}</style>\n</head>');
       const schemeUrl = hasTheme ? (schemeCache.get(schemeName) || '') : '';
       const ghUrl = schemeUrl ? schemeUrl.replace('raw.githubusercontent.com', 'github.com').replace('/spec-0.11/', '/blob/spec-0.11/') : '';
-      const host = req.headers.get('host') || 'localhost:3000';
+      const host = req.headers.get('host') || 'localhost:3001';
       const cssUrl = hasTheme ? ('http://' + host + '/theme.css?scheme=' + schemeName + (primarySlot !== 'base0D' ? '&primary=' + primarySlot : '')) : '';
       const stylePacks = ['vega','nova','maia','lyra','mira','luma','sera','rhea'];
       const styleOpts = stylePacks.map(s => '<option value="' + s + '"' + (s === currentStyle ? ' selected' : '') + '>' + s[0].toUpperCase() + s.slice(1) + '</option>').join('');
@@ -185,5 +185,5 @@ const server = Bun.serve({
   },
 });
 
-console.log('Serving at http://localhost:3000');
-console.log('Browse: http://localhost:3000/browse?scheme=one-dark');
+console.log('Serving at http://localhost:3001');
+console.log('Browse: http://localhost:3001/browse?scheme=one-dark');
