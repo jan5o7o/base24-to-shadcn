@@ -41,8 +41,12 @@ const server = Bun.serve({
   async fetch(req) {
     const url = new URL(req.url);
     
-    // Proxy basecoatui.com with injected theme — any path under /browse
+    // Proxy basecoatui.com with injected theme — any path under /browse (dev only)
     if (url.pathname.startsWith('/browse')) {
+      const host = req.headers.get('host') || '';
+      if (!host.includes('localhost') && !host.includes('127.0.0.1')) {
+        return new Response('Not Found', { status: 404 });
+      }
       const schemeName = url.searchParams.get('scheme') || '';
       const primarySlot = url.searchParams.get('primary') || 'base0D';
       
