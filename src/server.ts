@@ -43,10 +43,6 @@ const server = Bun.serve({
     
     // Proxy basecoatui.com with injected theme — any path under /browse (dev only)
     if (url.pathname.startsWith('/browse')) {
-      const host = req.headers.get('host') || '';
-      if (!host.includes('localhost') && !host.includes('127.0.0.1')) {
-        return new Response('Not Found', { status: 404 });
-      }
       const schemeName = url.searchParams.get('scheme') || '';
       const primarySlot = url.searchParams.get('primary') || 'base0D';
       
@@ -99,6 +95,11 @@ const server = Bun.serve({
       const schemeUrl = hasTheme ? (schemeCache.get(schemeName) || '') : '';
       const ghUrl = schemeUrl ? schemeUrl.replace('raw.githubusercontent.com', 'github.com').replace('/spec-0.11/', '/blob/spec-0.11/') : '';
       const host = req.headers.get('host') || 'localhost:3001';
+      // Only allow /browse on localhost (dev mode)
+      if (!host.includes('localhost') && !host.includes('127.0.0.1')) {
+        return new Response('Not Found', { status: 404 });
+      }
+
       const cssUrl = hasTheme ? ('http://' + host + '/theme.css?scheme=' + schemeName + (primarySlot !== 'base0D' ? '&primary=' + primarySlot : '')) : '';
       const stylePacks = ['vega','nova','maia','lyra','mira','luma','sera','rhea'];
       const styleOpts = stylePacks.map(s => '<option value="' + s + '"' + (s === currentStyle ? ' selected' : '') + '>' + s[0].toUpperCase() + s.slice(1) + '</option>').join('');
