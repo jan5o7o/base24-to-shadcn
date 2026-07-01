@@ -7,8 +7,8 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 | File | Purpose |
 |---|---|
 | `src/cli.ts` | CLI: `bun src/cli.ts <scheme.yaml> [-o theme.css] [-p base0D] [-r 0.625rem] [--preview]` |
-| `src/server.ts` | Bun HTTP server on port 3000: gallery + basecoat proxy + CSS API |
-| `public/gallery.html` | Self-contained browser gallery (190 schemes, live preview, CSS customizer) |
+| `src/server.ts` | Bun HTTP server on port 3001: gallery + basecoat proxy (localhost only) + CSS API |
+| `docs/gallery.html` | Self-contained browser gallery (190 schemes, live preview, CSS customizer). Served via GitHub Pages. |
 | `README.md` | Full documentation |
 
 ## Key Conventions
@@ -25,11 +25,11 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 ## Server Routes
 
 ```
-/                                public/gallery.html
-/?scheme=<name>                  gallery with specific scheme
-/browse?scheme=<name>            basecoatui.com proxied + theme injected
+/                                docs/index.html (landing page)
+/gallery                         docs/gallery.html (GitHub Pages ready)
+/gallery?scheme=<name>           gallery with specific scheme
+/browse?scheme=<name>            basecoatui.com proxied + theme injected (localhost only)
 /browse?scheme=<name>&style=<s>  same with style pack (vega/nova/…)
-/browse/components/button/…      any basecoatui.com path proxied
 /theme.css?scheme=<name>         raw CSS download
 /theme.css?scheme=<name>&style=<s>  CSS with style pack attribution
 /schemes                         JSON list of all 190 schemes
@@ -38,7 +38,7 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 ## Common Tasks
 
 ### Add a new feature to the gallery
-- Edit `public/gallery.html` — the `renderPreview` function builds the component showcase
+- Edit `docs/gallery.html` — the `renderPreview` function builds the component showcase
 - `generateCSS` produces the theme CSS, `applyTheme` injects it
 - `state.customMappings` holds CSS var → palette slot overrides
 - Cascade fixes are in the static `<style>` block (needed for Tailwind v3 CDN)
@@ -56,7 +56,7 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 ### Fix the cascade (Tailwind v3 Preflight breaking Basecoat)
 - Add explicit `background-color`, `color`, `border-color` rules for `.btn`, `.badge`, `.card`, `.input`, `.select`, `.alert` variants
 - Add hover rules with `color-mix(in oklab, …)`
-- File locations: public/gallery.html `<style>` block, src/server.ts `generateCSS` function
+- File locations: docs/gallery.html `<style>` block, src/server.ts `generateCSS` function
 
 ## Gotchas
 
