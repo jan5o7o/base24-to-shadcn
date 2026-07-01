@@ -421,7 +421,7 @@ function renderPreview(scheme) {
     '<span class="font-mono text-xs">'+(mode==="dark"?"🌙 dark scheme":"☀️ light scheme")+'</span></p>'+
     '<div class="flex flex-wrap gap-2 mt-3">'+
     '<a href="#" onclick="downloadCSS();return false" class="btn" data-variant="outline" data-size="sm">📥 Download CSS</a>'+
-    '<a href="/browse?scheme='+esc(scheme.name.replace(/\s+/g,'-').toLowerCase())+'&primary='+esc(primarySlot)+'" target="_blank" class="btn" data-variant="secondary" data-size="sm">↗ Open in Basecoat UI</a>'+
+    '<a href="/browse?scheme='+esc(scheme.name.replace(/\s+/g,'-').toLowerCase())+'&primary='+esc(primarySlot)+'" target="_blank" class="btn" data-variant="secondary" data-size="sm">↗ Preview in Basecoat UI</a>'+
     '</div></div>'+
     '<label class="flex items-center gap-2 text-sm text-muted-foreground">Primary:'+
     '<select id="primary-select" class="select text-sm" onchange="changePrimary(this.value)">'+
