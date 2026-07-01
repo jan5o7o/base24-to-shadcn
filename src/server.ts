@@ -149,12 +149,14 @@ const server = Bun.serve({
         html = html.replace('<html lang="en">', '<html lang="en" class="dark">');
       }
       // Inject preview banner + picker into header, script after body
-      var banner = '<div style="background:var(--color-primary);color:var(--color-primary-foreground);text-align:center;padding:4px 8px;font-size:12px;font-family:system-ui,sans-serif;">' +
-        '🎨 Theme preview — <a href="/" style="color:inherit;font-weight:600;text-decoration:underline;">base24-to-shadcn</a> · ' +
-        (hasTheme ? 'Scheme: <strong>' + schemeName.replace(/-/g,' ') + '</strong>' : 'No theme selected') +
-        ' · <a href="https://basecoatui.com" target="_blank" style="color:inherit;opacity:.8;">original site ↗</a></div>';
+      var banner = '<div style="background:var(--color-primary);color:var(--color-primary-foreground);display:flex;align-items:center;justify-content:center;gap:12px;padding:5px 12px;font-size:12px;font-family:system-ui,sans-serif;flex-wrap:wrap;">' +
+        '<span>🎨 <a href="/" style="color:inherit;font-weight:600;">base24-to-shadcn</a> preview</span>' +
+        '<span style="opacity:.7;">·</span>' +
+        picker +
+        '<span style="opacity:.7;">·</span>' +
+        '<a href="https://basecoatui.com" target="_blank" style="color:inherit;opacity:.7;font-size:11px;">original site ↗</a></div>';
       html = html.replace(/<body[^>]*>/, '$&' + banner + script);
-      html = html.replace(/(<header class="bg-background sticky[\s\S]*?px-4">)([\s\S]*?)(<\/div>\s*<\/header>)/, '$1$2' + picker + '</div></header>');
+      // Leave site header untouched (no picker injected there)
       return new Response(html, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       });
