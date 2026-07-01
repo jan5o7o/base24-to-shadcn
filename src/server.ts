@@ -149,13 +149,14 @@ const server = Bun.serve({
         html = html.replace('<html lang="en">', '<html lang="en" class="dark">');
       }
       // Inject preview banner + picker into header, script after body
-      var banner = '<div style="background:var(--color-primary);color:var(--color-primary-foreground);display:flex;align-items:center;justify-content:center;gap:12px;padding:5px 12px;font-size:12px;font-family:system-ui,sans-serif;flex-wrap:wrap;">' +
-        '<span>🎨 <a href="/" style="color:inherit;font-weight:600;">base24-to-shadcn</a> preview</span>' +
-        '<span style="opacity:.7;">·</span>' +
+      var banner = '<div style="background:var(--color-primary);color:var(--color-primary-foreground);display:flex;align-items:center;justify-content:center;gap:10px;padding:5px 12px;font-size:12px;font-family:system-ui,sans-serif;flex-wrap:wrap;">' +
+        '<a href="/gallery" style="color:inherit;font-weight:600;text-decoration:none;">← Gallery</a>' +
+        '<span style="opacity:.5;">·</span>' +
+        '<span>🎨 Theme preview</span>' +
+        '<span style="opacity:.5;">·</span>' +
         picker +
-        '<span style="opacity:.7;">·</span>' +
+        '<span style="opacity:.5;">·</span>' +
         '<a href="https://basecoatui.com" target="_blank" style="color:inherit;opacity:.7;font-size:11px;">original site ↗</a></div>';
-      html = html.replace(/<body[^>]*>/, '$&' + banner + script);
       // Leave site header untouched (no picker injected there)
       return new Response(html, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
