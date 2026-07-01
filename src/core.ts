@@ -182,7 +182,6 @@ export function getTokenMap(primarySlot: string): TokenDef[] {
     { token: "accent", slot: "base02" },
     { token: "accent-foreground", slot: "base05" },
     { token: "destructive", slot: "base08" },
-    { token: "destructive-foreground", slot: "base05" },
     { token: "border", slot: "base03" },
     { token: "input", slot: "base03" },
     { token: "ring", slot: primarySlot },
@@ -330,6 +329,15 @@ export function generateCSS(
   lines.push(".btn,.badge,.card,.input,.select,.alert{border-width:1px;border-style:solid}");
   lines.push(".btn,.input,.select{padding-inline:calc(var(--spacing,.25rem)*2.5)}");
   lines.push(":is(.field>input[type=checkbox],.input[type=checkbox]):checked{color:var(--background)!important}");
+
+  // @theme inline block for Tailwind v4 + shadcn/ui (commented out — uncomment to expose as utilities)
+  lines.push("/*");
+  lines.push("@theme inline {");
+  for (const def of tokenMap) {
+    if (def.slot) lines.push(`  --color-${def.token}: var(--${def.token});`);
+  }
+  lines.push("}");
+  lines.push("*/");
 
   return { css: lines.join("\n"), mode };
 }
