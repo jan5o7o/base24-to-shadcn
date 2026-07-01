@@ -173,7 +173,9 @@ const server = Bun.serve({
     }
     
     // Static files (from public/)
-    let path = url.pathname === "/" ? "/gallery.html" : url.pathname;
+    let path = url.pathname;
+    if (path === "/") path = "/index.html";
+    if (path === "/gallery") path = "/gallery.html";
     const file = Bun.file("./public" + path);
     if (await file.exists()) {
       return new Response(file);

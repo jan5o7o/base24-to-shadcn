@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>base24-to-shadcn</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: { extend: {
+    fontFamily: { sans: ['system-ui','-apple-system','sans-serif'], mono: ['ui-monospace','Menlo','monospace'] },
+  }},
+};
+</script>
+<style>
+  body { font-family: system-ui, -apple-system, sans-serif; }
+  .hero { background: linear-gradient(135deg, #1a1b26 0%, #282c34 50%, #1a1b26 100%); }
+  .card-hover { transition: border-color 0.2s, box-shadow 0.2s; }
+  .card-hover:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+  .gradient-text { background: linear-gradient(135deg, #7aa2f7, #bb9af7, #f7768e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  pre { overflow-x: auto; }
+</style>
+</head>
+<body class="bg-[#1a1b26] text-[#a9b1d6] min-h-screen">
+
+<!-- Hero -->
+<header class="hero py-20 px-4 text-center border-b border-white/5">
+  <h1 class="text-5xl font-bold mb-4 tracking-tight">
+    <span class="gradient-text">base24-to-shadcn</span>
+  </h1>
+  <p class="text-xl text-[#787c99] max-w-2xl mx-auto mb-8">
+    Convert any <a href="https://github.com/tinted-theming/base24" class="text-[#7aa2f7] hover:underline">tinted-theming base24</a>
+    color scheme into a <a href="https://ui.shadcn.com" class="text-[#7aa2f7] hover:underline">shadcn/ui</a> /
+    <a href="https://basecoatui.com" class="text-[#7aa2f7] hover:underline">Basecoat UI</a> CSS theme.
+    One command, 190+ schemes, zero dependencies.
+  </p>
+  <div class="flex flex-wrap gap-4 justify-center">
+    <a href="/gallery" class="px-6 py-3 rounded-lg bg-[#7aa2f7] text-[#1a1b26] font-semibold hover:bg-[#89b4ff] transition-colors">Open Gallery</a>
+    <a href="/browse?scheme=one-dark" class="px-6 py-3 rounded-lg border border-[#444b6a] text-[#a9b1d6] font-semibold hover:border-[#7aa2f7] hover:text-[#7aa2f7] transition-colors">Browse Basecoat UI</a>
+    <a href="https://github.com/jan5o7o/base24-to-shadcn" class="px-6 py-3 rounded-lg border border-[#444b6a] text-[#a9b1d6] font-semibold hover:border-[#7aa2f7] hover:text-[#7aa2f7] transition-colors">GitHub ↗</a>
+  </div>
+</header>
+
+<!-- Quick Start -->
+<section class="max-w-4xl mx-auto px-4 py-16">
+  <h2 class="text-3xl font-bold mb-8 text-[#c0caf5]">Quick Start</h2>
+
+  <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 mb-6">
+    <p class="text-sm text-[#787c99] mb-3">Convert a base24 scheme YAML to a shadcn/ui theme.css:</p>
+    <pre class="text-sm"><code class="text-[#9ece6a]">bun src/cli.ts</code> <code class="text-[#7dcfff]">scheme.yaml</code> <code class="text-[#787c99]">-o theme.css</code></pre>
+  </div>
+
+  <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 mb-6">
+    <p class="text-sm text-[#787c99] mb-3">From a URL with a preview:</p>
+    <pre class="text-sm"><code class="text-[#9ece6a]">bun src/cli.ts</code> <code class="text-[#7dcfff]">https://raw.githubusercontent.com/.../one-dark.yaml</code> <code class="text-[#787c99]">-o theme.css --preview</code></pre>
+  </div>
+
+  <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 mb-6">
+    <p class="text-sm text-[#787c99] mb-3">Use magenta as the primary color:</p>
+    <pre class="text-sm"><code class="text-[#9ece6a]">bun src/cli.ts</code> <code class="text-[#7dcfff]">scheme.yaml</code> <code class="text-[#787c99]">-p base0E</code></pre>
+  </div>
+
+  <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6">
+    <p class="text-sm text-[#787c99] mb-3">Start the gallery + proxy server:</p>
+    <pre class="text-sm"><code class="text-[#9ece6a]">bun src/server.ts</code></pre>
+    <p class="text-xs text-[#565f89] mt-2">Opens at <code class="text-[#787c99]">http://localhost:3000</code> — gallery, Basecoat UI proxy, CSS API.</p>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="max-w-4xl mx-auto px-4 py-16 border-t border-white/5">
+  <h2 class="text-3xl font-bold mb-8 text-[#c0caf5]">How It Works</h2>
+
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 card-hover">
+      <div class="text-2xl mb-3">🎨</div>
+      <h3 class="text-lg font-semibold text-[#c0caf5] mb-2">24 Colors → 30 Tokens</h3>
+      <p class="text-sm text-[#787c99]">
+        Each base24 slot maps to a semantic shadcn token. <code class="text-[#7aa2f7]">base00</code> becomes
+        <code class="text-[#7aa2f7]">--background</code>, <code class="text-[#bb9af7]">base0D</code> drives
+        <code class="text-[#bb9af7]">--primary</code>. Charts, sidebar, destructive — all mapped.
+      </p>
+    </div>
+
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 card-hover">
+      <div class="text-2xl mb-3">🔬</div>
+      <h3 class="text-lg font-semibold text-[#c0caf5] mb-2">Hex → oklch</h3>
+      <p class="text-sm text-[#787c99]">
+        Full Björn Ottosson conversion inline — sRGB linearization, D65 XYZ matrix,
+        LMS transform, cube root, oklch output. No dependencies.
+      </p>
+    </div>
+
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 card-hover">
+      <div class="text-2xl mb-3">🌓</div>
+      <h3 class="text-lg font-semibold text-[#c0caf5] mb-2">Auto Light/Dark</h3>
+      <p class="text-sm text-[#787c99]">
+        Detects scheme mode from <code class="text-[#7aa2f7]">variant</code> field or luminance.
+        Auto-generates the opposite variant — neutral axis swap, capped chroma,
+        adjusted lightness.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Mapping -->
+<section class="max-w-4xl mx-auto px-4 py-16 border-t border-white/5">
+  <h2 class="text-3xl font-bold mb-8 text-[#c0caf5]">Token Mapping</h2>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="text-left text-[#787c99] border-b border-white/5">
+          <th class="py-3 pr-6 font-medium">shadcn token</th>
+          <th class="py-3 pr-6 font-medium">base24 slot</th>
+          <th class="py-3 font-medium">Rationale</th>
+        </tr>
+      </thead>
+      <tbody class="text-[#a9b1d6]">
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#7aa2f7]">--background</td><td class="py-2 pr-6 font-mono">base00</td><td class="py-2 text-[#787c99]">Default background (darkest)</td></tr>
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#7aa2f7]">--foreground</td><td class="py-2 pr-6 font-mono">base05</td><td class="py-2 text-[#787c99]">Primary text color</td></tr>
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#7aa2f7]">--card</td><td class="py-2 pr-6 font-mono">base01</td><td class="py-2 text-[#787c99]">Elevated surface</td></tr>
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#bb9af7]">--primary</td><td class="py-2 pr-6 font-mono text-[#bb9af7]">base0D ✦</td><td class="py-2 text-[#787c99]">Brand/action color (overridable)</td></tr>
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#7aa2f7]">--secondary</td><td class="py-2 pr-6 font-mono">base02</td><td class="py-2 text-[#787c99]">Selection background</td></tr>
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#7aa2f7]">--muted</td><td class="py-2 pr-6 font-mono">base01</td><td class="py-2 text-[#787c99]">Subdued surface</td></tr>
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#f7768e]">--destructive</td><td class="py-2 pr-6 font-mono">base08</td><td class="py-2 text-[#787c99]">Errors, destructive actions</td></tr>
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#7aa2f7]">--border</td><td class="py-2 pr-6 font-mono">base03</td><td class="py-2 text-[#787c99]">Subtle borders</td></tr>
+        <tr class="border-b border-white/5"><td class="py-2 pr-6 font-mono text-[#bb9af7]">--ring</td><td class="py-2 pr-6 font-mono text-[#bb9af7]">base0D ✦</td><td class="py-2 text-[#787c99]">Focus ring (follows primary)</td></tr>
+        <tr><td class="py-2 pr-6 font-mono text-[#7aa2f7]">--sidebar</td><td class="py-2 pr-6 font-mono">base10</td><td class="py-2 text-[#787c99]">Darker sidebar background</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="text-xs text-[#565f89] mt-4">✦ = configurable via <code class="text-[#787c99]">--primary</code> flag. Also changes --ring, --chart-1, --sidebar-primary.</p>
+</section>
+
+<!-- Tech -->
+<section class="max-w-4xl mx-auto px-4 py-16 border-t border-white/5">
+  <h2 class="text-3xl font-bold mb-8 text-[#c0caf5]">Technologies</h2>
+
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-5">
+      <h3 class="font-semibold text-[#c0caf5] mb-1">Bun</h3>
+      <p class="text-xs text-[#787c99]">Runtime — fast TS execution, built-in HTTP server, zero-config.</p>
+    </div>
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-5">
+      <h3 class="font-semibold text-[#c0caf5] mb-1">Basecoat UI</h3>
+      <p class="text-xs text-[#787c99]">Component library — shadcn/ui for any web stack. CDN at <code>unpkg.com/basecoat-css@1.0.1</code>.</p>
+    </div>
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-5">
+      <h3 class="font-semibold text-[#c0caf5] mb-1">Tailwind CSS</h3>
+      <p class="text-xs text-[#787c99]">v3 Play CDN for gallery, v4 compiled in Basecoat's style packs. Cascade fixes for v3/v4 layer conflicts.</p>
+    </div>
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-5">
+      <h3 class="font-semibold text-[#c0caf5] mb-1">oklch color space</h3>
+      <p class="text-xs text-[#787c99]">Perceptually uniform. Björn Ottosson's conversion: sRGB → linear → XYZ D65 → LMS → oklch.</p>
+    </div>
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-5">
+      <h3 class="font-semibold text-[#c0caf5] mb-1">tinted-theming</h3>
+      <p class="text-xs text-[#787c99]">190+ base24 schemes from <code>spec-0.11</code>. Fetched from GitHub API, parsed inline.</p>
+    </div>
+    <div class="bg-[#1f2335] border border-white/5 rounded-xl p-5">
+      <h3 class="font-semibold text-[#c0caf5] mb-1">Zero Dependencies</h3>
+      <p class="text-xs text-[#787c99]">No npm packages. YAML parsed with regex, oklch conversion inline, HTML generated from templates.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Motivation -->
+<section class="max-w-4xl mx-auto px-4 py-16 border-t border-white/5">
+  <h2 class="text-3xl font-bold mb-8 text-[#c0caf5]">Motivation</h2>
+
+  <div class="bg-[#1f2335] border border-white/5 rounded-xl p-6 space-y-4 text-[#a9b1d6] leading-relaxed">
+    <p>
+      The <a href="https://github.com/tinted-theming" class="text-[#7aa2f7] hover:underline">tinted-theming</a>
+      project maintains <strong>hundreds of meticulously crafted color schemes</strong> — battle-tested across
+      terminals, editors, and applications for over a decade.
+    </p>
+    <p>
+      Meanwhile, <a href="https://ui.shadcn.com/docs/theming" class="text-[#7aa2f7] hover:underline">shadcn/ui theming</a>
+      uses CSS custom properties in <code class="text-[#9ece6a]">oklch()</code> — a modern, perceptually uniform
+      color space. But there was <strong>no bridge</strong> between these two worlds.
+    </p>
+    <p>
+      <strong>base24-to-shadcn</strong> is that bridge. It takes any base24 scheme, converts every hex color
+      to oklch via the Björn Ottosson algorithm, and maps the 24 terminal slots to shadcn's 30 semantic
+      design tokens. The result: instant, production-ready CSS themes that work with
+      <a href="https://basecoatui.com" class="text-[#7aa2f7] hover:underline">Basecoat UI</a>,
+      shadcn/ui, and any Tailwind CSS project.
+    </p>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="max-w-4xl mx-auto px-4 py-12 border-t border-white/5 text-center text-sm text-[#565f89]">
+  <p class="mb-2">
+    Built with <span class="text-[#f7768e]">♥</span> by <a href="https://github.com/jan5o7o" class="text-[#7aa2f7] hover:underline">jan5o7o</a>
+  </p>
+  <p>
+    <a href="https://github.com/jan5o7o/base24-to-shadcn" class="text-[#787c99] hover:text-[#a9b1d6] transition-colors">GitHub</a>
+    <span class="mx-3">·</span>
+    <a href="/gallery" class="text-[#787c99] hover:text-[#a9b1d6] transition-colors">Gallery</a>
+    <span class="mx-3">·</span>
+    <a href="/browse?scheme=one-dark" class="text-[#787c99] hover:text-[#a9b1d6] transition-colors">Browse Basecoat UI</a>
+  </p>
+</footer>
+
+</body>
+</html>
