@@ -104,7 +104,7 @@ const server = Bun.serve({
         '<select onchange="window._base24SwitchStyle(this.value)" style="background:transparent;color:inherit;border:1px solid;border-radius:4px;padding:1px 4px;font-size:11px;max-width:72px;">' + styleOpts + '</select>' +
         '<span style="opacity:.7;">Color:</span>' +
         '<select onchange="window._base24Navigate(this.value)" style="background:transparent;color:inherit;border:1px solid;border-radius:4px;padding:1px 4px;font-size:11px;max-width:100px;">' + dropdownOpts + '</select>' +
-        (hasTheme ? '<a href="' + cssUrl + '" target="_blank" style="color:inherit;opacity:.7;text-decoration:none;font-size:11px;" title="Download theme.css">CSS</a>' : '') +
+        (hasTheme ? '<a href="' + cssUrl + '" target="_blank" style="color:inherit;border:1px solid;border-radius:4px;padding:1px 6px;text-decoration:none;font-size:11px;opacity:.9;" title="Download theme.css">CSS</a>' : '') +
         (ghUrl ? '<a href="' + ghUrl + '" target="_blank" style="color:inherit;opacity:.7;text-decoration:none;font-size:11px;" title="View source on GitHub">↗</a>' : '') +
         '</div>';
       const script = '<script>' +
@@ -157,7 +157,8 @@ const server = Bun.serve({
         picker +
         '<span style="opacity:.5;">·</span>' +
         '<a href="https://basecoatui.com" target="_blank" style="color:inherit;opacity:.7;font-size:11px;">original site ↗</a></div>';
-      // Leave site header untouched (no picker injected there)
+      html = html.replace(/<body[^>]*>/, '$&' + banner + script);
+      
       return new Response(html, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       });
