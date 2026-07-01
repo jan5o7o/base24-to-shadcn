@@ -148,10 +148,13 @@ const server = Bun.serve({
       if (hasTheme && mode === 'dark') {
         html = html.replace('<html lang="en">', '<html lang="en" class="dark">');
       }
-      // Inject picker into site header, script after body
+      // Inject preview banner + picker into header, script after body
+      var banner = '<div style="background:var(--color-primary);color:var(--color-primary-foreground);text-align:center;padding:4px 8px;font-size:12px;font-family:system-ui,sans-serif;">' +
+        '🎨 Theme preview — <a href="/" style="color:inherit;font-weight:600;text-decoration:underline;">base24-to-shadcn</a> · ' +
+        (hasTheme ? 'Scheme: <strong>' + schemeName.replace(/-/g,' ') + '</strong>' : 'No theme selected') +
+        ' · <a href="https://basecoatui.com" target="_blank" style="color:inherit;opacity:.8;">original site ↗</a></div>';
+      html = html.replace(/<body[^>]*>/, '$&' + banner + script);
       html = html.replace(/(<header class="bg-background sticky[\s\S]*?px-4">)([\s\S]*?)(<\/div>\s*<\/header>)/, '$1$2' + picker + '</div></header>');
-      html = html.replace(/<body[^>]*>/, '$&' + script);
-      
       return new Response(html, {
         headers: { 'Content-Type': 'text/html; charset=utf-8' }
       });
