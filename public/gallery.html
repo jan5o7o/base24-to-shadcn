@@ -407,6 +407,12 @@ function renderPreview(scheme) {
       (roleLabel?'<div class="swatch-hex">'+roleLabel+'</div>':'<div class="swatch-hex">#'+pal[s]+'</div>')+
     '</div>';
   }).join("");
+
+  var chartSlots = [primarySlot,"base0B","base0A","base0E","base08"];
+  var chartBars = chartSlots.filter(function(s){return pal[s];}).map(function(s){
+    return '<div class="flex-1 h-6 rounded" style="background:'+oklchS(hexToOklch(pal[s]))+'" title="'+s+': #'+pal[s]+'"></div>';
+  }).join("");
+
   var preview = document.getElementById("preview-content");
   preview.innerHTML =
     '<div class="mb-8"><div class="flex flex-wrap items-start justify-between gap-4"><div>'+
