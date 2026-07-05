@@ -1,6 +1,6 @@
-# Color Themes for BasecoatUI &amp; shadcn/ui
+# base24 Themes Everywhere
 
-Convert any [tinted-theming base24](https://github.com/tinted-theming/base24) color scheme into a CSS theme for [shadcn/ui](https://ui.shadcn.com) and [Basecoat UI](https://basecoatui.com). 190+ schemes, zero dependencies.
+Convert [tinted-theming base24](https://github.com/tinted-theming/base24) color schemes into CSS themes for [shadcn/ui](https://ui.shadcn.com), [Basecoat UI](https://basecoatui.com), and [Astryx](https://astryx.atmeta.com). 190+ schemes, zero dependencies.
 
 **[Open Gallery →](https://jan5o7o.github.io/base24-to-shadcn/gallery)**
 
@@ -101,16 +101,14 @@ A commented-out `@theme inline` block is included for Tailwind v4 users wanting 
 ## Files
 
 ```
-src/cli.ts         CLI: single-scheme converter → theme.css + preview.html
-src/core.ts        Shared: YAML parse, hex→oklch, CSS generation, opposite variant
-src/server.ts      Bun HTTP server: gallery + basecoat proxy (localhost only) + CSS API
-docs/index.html    Landing page (GitHub Pages)
-docs/gallery.html  Self-contained browser gallery (GitHub Pages)
+src/cli.ts            CLI: single-scheme converter → theme.css + preview.html
+src/core.ts           Shared: YAML parse, hex→oklch, CSS generation, opposite variant
+src/server.ts         Bun HTTP server: gallery + basecoat proxy (localhost only) + CSS API + /astryx
+docs/index.html       Landing page (GitHub Pages)
+docs/gallery.html     Self-contained browser gallery (GitHub Pages)
+docs/astryx/          Built Astryx POC (GitHub Pages)
+poc-astryx/           Astryx POC source: Vite+React, defineTheme adapter, 12 schemes
 ```
-
-## Architecture
-
-- **Zero dependencies** — no npm packages. YAML parsed with regex, oklch inline, HTML from templates
 - **Hex → oklch** via Björn Ottosson conversion (D65, gamma 2.2), 3 decimal L/C, 0 decimal H
 - **Client-side gallery** — all conversion logic runs in the browser. Gallery works on any static host
 - **GitHub Pages** — `docs/` folder deployed to `jan5o7o.github.io/base24-to-shadcn`
@@ -122,6 +120,48 @@ docs/gallery.html  Self-contained browser gallery (GitHub Pages)
 - **Cascade fixes for Tailwind v3** — gallery uses Tailwind v3 CDN which conflicts with Basecoat v4 `@layer`; explicit unlayered rules fix this
 - **Browse proxy localhost-only** — gate prevents proxying basecoatui.com from production
 - **CDN via unpkg** — jsDelivr had 503 for `basecoat-css@1.0.1`
+
+## Astryx Theme POC
+
+Base24 schemes can now power Astryx themes via `defineTheme()`:
+
+**[Open Astryx POC →](https://jan5o7o.github.io/base24-to-shadcn/astryx)**
+
+```ts
+import { defineTheme } from '@astryxdesign/core/theme';
+import { neutralTheme } from '@astryxdesign/theme-neutral';
+
+export const onedarkTheme = defineTheme({
+  name: 'One Dark',
+  extends: neutralTheme,
+  color: { accent: '#61afef', neutralStyle: 'cool' },
+  tokens: {
+    '--color-background-body':  ['#fafafa', '#282c34'],
+    '--color-text-primary':     ['#282c34', '#abb2bf'],
+    '--color-error':            ['#e06c75', '#e06c75'],
+    // … 79 tokens mapped from 24 base24 slots
+  },
+});
+```
+
+The POC (`poc-astryx/`) has 12 schemes (9 dark + 3 light) with a live theme picker, component showcase, and copy-paste `defineTheme()` code. It extends Astryx's Neutral theme — inheriting typography, motion, radius, and shadows — and overrides all color tokens from base24.
+
+### How it works
+
+```
+base24 palette (24 hex slots)
+        │
+        ▼
+  paletteToThemeInput()
+        │
+        ├── color.accent = base0D  →  Astryx handles accent scale, blue categoricals
+        └── tokens               →  structural overrides: backgrounds, text, borders, status
+        │
+        ▼
+  defineTheme({ extends: neutralTheme, color, tokens })
+```
+
+`base0D` drives the accent; everything else maps to Astryx's `--color-*` CSS custom properties as `light-dark()` tuples. See `poc-astryx/src/mapper.ts` for the full 79-token mapping.
 
 ---
 
