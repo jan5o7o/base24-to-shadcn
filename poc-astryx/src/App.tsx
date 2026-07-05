@@ -18,20 +18,10 @@ function themeToCode(key: string): string {
   const mode = detectMode(s.palette, s.variant);
   const { accent, neutralStyle, tokens } = paletteToThemeInput(s.palette, mode);
 
-  // Select a representative subset of tokens to show
-  const sampleTokens = [
-    '--color-background-body',
-    '--color-background-surface',
-    '--color-text-primary',
-    '--color-border',
-    '--color-error',
-    '--color-success',
-    '--color-warning',
-  ];
-  const tokenLines = sampleTokens
-    .filter(k => tokens[k])
-    .map(k => {
-      const v = tokens[k];
+  // Show all tokens from the mapper
+  const tokenLines = Object.entries(tokens)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([k, v]) => {
       return Array.isArray(v)
         ? `    '${k}': ['${v[0]}', '${v[1]}'],`
         : `    '${k}': '${v}',`;
@@ -53,7 +43,6 @@ function themeToCode(key: string): string {
     '',
     '  tokens: {',
     ...tokenLines,
-    '    // … see full token list at poc/src/mapper.ts',
     '  },',
     '});',
   ].join('\n');
@@ -108,7 +97,7 @@ function App() {
 
         <Heading level={4}>defineTheme()</Heading>
         <Card>
-          <pre style={{ margin: 0, fontSize: '0.8125rem', lineHeight: 1.6, overflow: 'auto' }}>
+          <pre style={{ margin: 0, fontSize: '0.75rem', lineHeight: 1.55, overflow: 'auto', maxHeight: 340 }}>
             <code>{themeCode}</code>
           </pre>
         </Card>
