@@ -1,0 +1,44 @@
+@import '@astryxdesign/core/reset.css';
+@import '@astryxdesign/core/astryx.css';
+@import '@astryxdesign/theme-neutral/theme.css';
+
+/* Force the correct color-scheme so light-dark() resolves to the active mode.
+   Must be unlayered to beat @layer astryx-theme's :root { color-scheme: light dark }. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+}
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Fix: Astryx v0.1.3 destructive button text color override.
+   The variant should use --color-on-error for text but the compiled
+   StyleX cascade doesn't propagate it to inner text spans. */
+[data-variant="destructive"].astryx-button,
+[data-variant="destructive"].astryx-button span {
+  color: var(--color-on-error) !important;
+}
+
+/* Fix: Banner uses --color-text-primary for titles regardless of status.
+   Override to use status-aware on-colors for contrast on colored backgrounds.
+   Targets header-area child divs that aren't the icon wrapper. */
+.astryx-banner.info > div:not([class*="banner-icon"]),
+.astryx-banner.info > div:not([class*="banner-icon"]) * {
+  color: var(--color-text-blue) !important;
+}
+.astryx-banner.success > div:not([class*="banner-icon"]),
+.astryx-banner.success > div:not([class*="banner-icon"]) * {
+  color: var(--color-on-success) !important;
+}
+.astryx-banner.warning > div:not([class*="banner-icon"]),
+.astryx-banner.warning > div:not([class*="banner-icon"]) * {
+  color: var(--color-on-warning) !important;
+}
+.astryx-banner.error > div:not([class*="banner-icon"]),
+.astryx-banner.error > div:not([class*="banner-icon"]) * {
+  color: var(--color-on-error) !important;
+}
+
+body {
+  margin: 0;
+}

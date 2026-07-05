@@ -186,6 +186,14 @@ const server = Bun.serve({
       });
     }
     
+    // Astryx POC — SPA served from docs/astryx/
+    if (url.pathname.startsWith('/astryx')) {
+      const file = Bun.file("./docs" + url.pathname);
+      if (await file.exists()) return new Response(file);
+      // SPA fallback: all /astryx/* routes serve index.html
+      return new Response(Bun.file("./docs/astryx/index.html"));
+    }
+
     // Static files (from public/)
     let path = url.pathname;
     if (path === "/") path = "/index.html";
