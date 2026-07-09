@@ -87,7 +87,7 @@ A commented-out `@theme inline` block is included for Tailwind v4 users wanting 
 
 ## Gallery Features
 
-- **190+ schemes** loaded from GitHub, fully searchable
+- **190+ schemes** hosted locally in the repo — no external API calls, no rate limits
 - **Live preview** with Basecoat UI components (buttons, cards, inputs, badges, alerts)
 - **Clickable scheme name** → links to source YAML on GitHub
 - **Clickable author** → links to author's GitHub (when URL present in author field)
@@ -104,15 +104,27 @@ A commented-out `@theme inline` block is included for Tailwind v4 users wanting 
 src/cli.ts            CLI: single-scheme converter → theme.css + preview.html
 src/core.ts           Shared: YAML parse, hex→oklch, CSS generation, opposite variant
 src/server.ts         Bun HTTP server: gallery + basecoat proxy (localhost only) + CSS API + /astryx
+schemes/base24/       190 scheme YAMLs (served by Bun server)
 docs/index.html       Landing page (GitHub Pages)
 docs/gallery.html     Self-contained browser gallery (GitHub Pages)
+docs/schemes.json     Scheme index (names + paths, for gallery)
+docs/schemes/         190 scheme YAMLs (served by GitHub Pages)
 docs/astryx/          Built Astryx POC (GitHub Pages)
 poc-astryx/           Astryx POC source: Vite+React, defineTheme adapter, 12 schemes
 ```
+
+## Local Scheme Hosting
+
+All 190 scheme YAMLs are committed to the repo in two places:
+- `schemes/base24/` — for the Bun dev server (`bun src/server.ts`)
+- `docs/schemes/` — for GitHub Pages (static file serving)
+
+
+## Architecture
+
+
 - **Hex → oklch** via Björn Ottosson conversion (D65, gamma 2.2), 3 decimal L/C, 0 decimal H
 - **Client-side gallery** — all conversion logic runs in the browser. Gallery works on any static host
-- **GitHub Pages** — `docs/` folder deployed to `jan5o7o.github.io/base24-to-shadcn`
-
 ## Design Decisions
 
 - **Only color tokens in output** — `--radius`, spacing, shadows belong to the style pack

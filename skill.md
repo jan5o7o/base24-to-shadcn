@@ -1,16 +1,19 @@
 # base24-to-shadcn
-
-Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat UI.
+Convert tinted-theming base24 color schemes to CSS themes for Basecoat UI, shadcn/ui, and Astryx.
 
 ## Files
 
 | File | Purpose |
 |---|---|
 | `src/cli.ts` | CLI: `bun src/cli.ts <scheme.yaml> [-o theme.css] [-p base0D] [-r 0.625rem] [--preview]` |
-| `src/server.ts` | Bun HTTP server on port 3001: gallery + basecoat proxy (localhost only) + CSS API |
+| `src/server.ts` | Bun HTTP server on port 3001: gallery + basecoat proxy (localhost only) + CSS API + /astryx |
+| `src/core.ts` | Shared: YAML parse, hex→oklch, CSS generation, opposite variant |
 | `docs/gallery.html` | Self-contained browser gallery (190 schemes, live preview, CSS customizer). Served via GitHub Pages. |
+| `docs/schemes/` | 190 base24 YAMLs for GitHub Pages. `docs/schemes.json` is the index. |
+| `schemes/base24/` | 190 base24 YAMLs for the Bun dev server. |
+| `docs/astryx/` | Built Astryx theme POC (Vite+React, 12 schemes, defineTheme adapter) |
+| `poc-astryx/src/mapper.ts` | base24 → defineTheme() adapter: `paletteToThemeInput()` |
 | `README.md` | Full documentation |
-
 ## Key Conventions
 
 - **Only color tokens** in theme output — `--radius`, spacing, shadows belong to the style pack
@@ -18,7 +21,7 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 - **Mode detection**: `variant` field first, then luminance of base00 vs base07
 - **Opposite variant**: auto-generated for the other mode (neutral swap, capped chroma)
 - **Primary slot**: defaults to `base0D` (blue), overridable via `-p` or `--primary`
-- **Tinted-theming schemes**: `spec-0.11` branch, `base24/` directory on GitHub
+- **Schemes hosted locally** — 190 YAMLs in `schemes/base24/` and `docs/schemes/`. No GitHub API dependency.
 - **Basecoat CDN**: `unpkg.com/basecoat-css@1.0.1` (jsDelivr had 503 for this version)
 - **Tailwind v3 vs v4 conflict**: gallery uses Tailwind v3 CDN which conflicts with Basecoat v4 `@layer` — fix with explicit unlayered cascade rules. Browse mode uses v4 natively so no conflict.
 
@@ -32,9 +35,11 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 /browse?scheme=<name>&style=<s>  same with style pack (vega/nova/…)
 /theme.css?scheme=<name>         raw CSS download
 /theme.css?scheme=<name>&style=<s>  CSS with style pack attribution
-/schemes                         JSON list of all 190 schemes
+/schemes                         JSON list of all 190 schemes (local files)
+/schemes/<name>.yaml             raw YAML file (local files)
+/astryx                          Astryx theme POC (built SPA)
+/astryx/*                        Astryx POC assets (SPA fallback)
 ```
-
 ## Common Tasks
 
 ### Add a new feature to the gallery
@@ -66,4 +71,4 @@ Convert tinted-theming base24 color schemes to shadcn/ui CSS themes for Basecoat
 - `<details>` closes when clicking `<select>` inside — use `onclick="event.stopPropagation()"`
 - `</script>` inside template literals breaks the HTML parser
 - Gallery `applyTheme()` must be called after `selectScheme` to inject CSS
-- GitHub API rate limits — the scheme list is fetched once and cached in memory
+- ~~GitHub API rate limits~~ — Fixed: schemes are hosted locally in `docs/schemes/` and `schemes/base24/`. No more 429 errors.
