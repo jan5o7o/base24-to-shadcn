@@ -173,6 +173,18 @@ base24 palette (24 hex slots)
   defineTheme({ extends: neutralTheme, color, tokens })
 ```
 
+### CSS fixes (Astryx v0.1.3)
+
+Three overrides are included in the copy-paste block to fix v0.1.3 quirks:
+
+| Fix | Why |
+|---|---|
+| `html[data-theme] { color-scheme }` | `@layer astryx-theme` injects `color-scheme: light dark` on `:root` which beats the reset layer's `[data-theme]` rule — `light-dark()` resolves to wrong mode without this unlayered override |
+| Destructive button `color: var(--color-on-error) !important` | StyleX cascade drops `--color-on-error` from reaching inner text spans — button text matches background |
+| Banner title colors per status | Banner uses `--color-text-primary` for all titles by design; base24 status colors are saturated, causing poor contrast. Overrides use `--color-on-*` instead |
+
+These are expected to be unnecessary once Astryx ships the fixes upstream.
+
 `base0D` drives the accent; everything else maps to Astryx's `--color-*` CSS custom properties as `light-dark()` tuples. See `poc-astryx/src/mapper.ts` for the full 79-token mapping.
 
 ---
