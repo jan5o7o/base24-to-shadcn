@@ -269,7 +269,7 @@ var state = {
   customMappings: {},
 };
 
-var GH_API = "https://api.github.com/repos/tinted-theming/schemes/contents/base24?ref=spec-0.11";
+var SCHEMES_URL = "/schemes";
 
 function esc(s) {
   return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -299,11 +299,10 @@ function authorLink(scheme) {
 async function fetchSchemeList() {
   var container = document.getElementById("scheme-items");
   try {
-    var res = await fetch(GH_API);
-    if (!res.ok) throw new Error("GitHub API: "+res.status);
-    var files = await res.json();
-    state.schemes = files.filter(function(f){return f.name.endsWith(".yaml");})
-      .map(function(f){return {name:f.name.replace(".yaml",""),url:f.download_url};})
+    var res = await fetch(SCHEMES_URL);
+    if (!res.ok) throw new Error("HTTP "+res.status);
+    var items = await res.json();
+    state.schemes = items
       .sort(function(a,b){return a.name.localeCompare(b.name);});
     document.getElementById("scheme-count").textContent = state.schemes.length+" schemes";
     renderSchemeList(state.schemes);

@@ -7,30 +7,37 @@ import {
 const BASECOAT_VERSION = "1.0.1";
 
 // ── Cache ──────────────────────────────────────────────────────────
-const schemeCache = new Map();
-const GH_LIST = 'https://api.github.com/repos/tinted-theming/schemes/contents/base24?ref=spec-0.11';
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 
-async function getSchemeList() {
-  if (schemeCache.size > 0) return Array.from(schemeCache.entries()).map(([name,url]) => ({name,url}));
-  const res = await fetch(GH_LIST, { headers: { 'User-Agent': 'base24-gallery' } });
-  const files = await res.json();
-  for (const f of files) {
-    if (f.name.endsWith('.yaml')) {
-      schemeCache.set(f.name.replace('.yaml',''), f.download_url);
+const SCHEMES_DIR = join(import.meta.dirname, "..", "schemes", "base24");
+const schemeCache = new Map<string, string>(); // name -> file path
+let schemeListReady = false;
+
+async function ensureSchemeCache(): Promise<void> {
+  if (schemeListReady) return;
+  const entries = await readdir(SCHEMES_DIR);
+  for (const entry of entries) {
+    if (entry.endsWith('.yaml')) {
+      schemeCache.set(entry.replace('.yaml', ''), join(SCHEMES_DIR, entry));
     }
   }
-  return Array.from(schemeCache.entries()).map(([name,url]) => ({name,url}));
+  schemeListReady = true;
 }
 
-const cssCache = new Map();
-async function getSchemeCSS(name, primarySlot, stylePack) {
+function getSchemeList() {
+  return Array.from(schemeCache.entries()).map(([name, path]) => ({ name, url: `/schemes/${name}.yaml` }));
+}
+
+const cssCache = new Map<string, { css: string; mode: string }>();
+async function getSchemeCSS(name: string, primarySlot: string, stylePack: string) {
   const key = name + '|' + (primarySlot || 'base0D') + '|' + (stylePack || 'vega');
-  if (cssCache.has(key)) return cssCache.get(key);
-  const url = schemeCache.get(name);
-  if (!url) return null;
-  const yaml = await (await fetch(url)).text();
+  if (cssCache.has(key)) return cssCache.get(key)!;
+  const filePath = schemeCache.get(name);
+  if (!filePath) return null;
+  const yaml = await Bun.file(filePath).text();
   const scheme = parseYaml(yaml);
-  const result = generateCSS(scheme, primarySlot || "base0D", "0.625rem", true, stylePack || "vega", url);
+  const result = generateCSS(scheme, primarySlot || "base0D", "0.625rem", true, stylePack || "vega", filePath);
   cssCache.set(key, result);
   return result;
 }
@@ -170,18 +177,28 @@ const server = Bun.serve({
     }
     // API: list schemes
     if (url.pathname === '/schemes') {
-      const schemes = await getSchemeList();
-      return Response.json(schemes);
+      await ensureSchemeCache();
+      return Response.json(getSchemeList());
     }
-    
+
+    // Serve raw YAML files from schemes/base24/
+    if (url.pathname.startsWith('/schemes/') && url.pathname.endsWith('.yaml')) {
+      await ensureSchemeCache();
+      const name = url.pathname.replace('/schemes/', '').replace('.yaml', '');
+      const filePath = schemeCache.get(name);
+      if (filePath) return new Response(Bun.file(filePath));
+      return new Response('not found', { status: 404 });
+    }
+
     // API: get CSS for a scheme
     if (url.pathname === '/theme.css') {
       const schemeName = url.searchParams.get('scheme') || 'one-dark';
       const primarySlot = url.searchParams.get('primary') || 'base0D';
       const stylePack = url.searchParams.get('style') || 'vega';
-      await getSchemeList();
-      const { css } = await getSchemeCSS(schemeName, primarySlot, stylePack);
-      return new Response(css, {
+      await ensureSchemeCache();
+      const result = await getSchemeCSS(schemeName, primarySlot, stylePack);
+      if (!result) return new Response('scheme not found', { status: 404 });
+      return new Response(result.css, {
         headers: { 'Content-Type': 'text/css' }
       });
     }
@@ -207,5 +224,6 @@ const server = Bun.serve({
   },
 });
 
+await ensureSchemeCache();
 console.log('Serving at http://localhost:3001');
 console.log('Browse: http://localhost:3001/browse?scheme=one-dark');
